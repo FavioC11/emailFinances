@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+:root {
+  /* Chrome e ink (paleta de referencia, modo claro) */
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --hairline: rgba(11, 11, 11, 0.1);
+
+  /* Series */
+  --ingreso: #2a78d6;
+  --egreso: #e34948;
+  --good-text: #006300;
+
+  /* Categorías (orden fijo, validado) */
+  --cat-1: #2a78d6;
+  --cat-2: #eb6834;
+  --cat-3: #1baf7a;
+  --cat-4: #eda100;
+  --cat-5: #e87ba4;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}

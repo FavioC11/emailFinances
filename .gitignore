@@ -36,3 +36,6 @@ yarn-error.log*
 # supabase local
 supabase/.temp
 supabase/.branches
+
+# graphify — grafo de código local (no se versiona)
+/graphify-out/

@@ -4,7 +4,10 @@ import type { ParsedTransaction } from "./types";
 export function parseBcp(text: string): ParsedTransaction {
   const amount =
     text.match(/Total de la operaci[óo]n\s*S\/\s*([\d,]+\.\d{2})/i)?.[1]
-    ?? text.match(/operaci[óo]n de\s*S\/\s*([\d,]+\.\d{2})/i)?.[1];
+    ?? text.match(/Total del consumo\s*S\/\s*([\d,]+\.\d{2})/i)?.[1]
+    ?? text.match(/(?:un\s+)?consumo de\s*S\/\s*([\d,]+\.\d{2})/i)?.[1]
+    ?? text.match(/operaci[óo]n de\s*S\/\s*([\d,]+\.\d{2})/i)?.[1]
+    ?? text.match(/S\/\s*([\d,]+\.\d{2})/)?.[1]; // fallback: primer monto S/ del correo
   const counterparty =
     text.match(/Empresa\s*(.+?)\s*(?:Canal|N[úu]mero)/is)?.[1]?.trim() ?? null;
   const operation_no =

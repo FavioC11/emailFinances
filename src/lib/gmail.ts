@@ -68,7 +68,9 @@ export async function fetchGmail(from: string, sinceIso: string): Promise<Incomi
   const token = await getAccessToken();
   const headers = { authorization: `Bearer ${token}` };
   const afterEpoch = Math.max(0, Math.floor(new Date(sinceIso).getTime() / 1000));
-  const q = `from:${from} after:${afterEpoch}`;
+  // Gmail devuelve 0 resultados con `after:0` (epoch 1970): en ese caso, en la
+  // primera corrida sin estado previo, omitimos el filtro de fecha para traer todo.
+  const q = afterEpoch > 0 ? `from:${from} after:${afterEpoch}` : `from:${from}`;
 
   const ids: string[] = [];
   let pageToken: string | undefined;

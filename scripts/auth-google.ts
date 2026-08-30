@@ -59,10 +59,16 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log("Abre esta URL en tu navegador y autoriza el acceso:\n");
   console.log(authUrl + "\n");
-  const opener =
-    process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
-  spawn(opener, [authUrl], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).on(
-    "error",
-    () => {} // si no se puede abrir solo, el usuario copia la URL
-  );
+  if (process.platform === "win32") {
+    // Con shell:true pasamos un comando completo y entrecomillamos la URL para
+    // que cmd no trate los `&` como separadores de comando (eso truncaba la URL
+    // y Google devolvía "Required parameter is missing: response_type").
+    spawn(`start "" "${authUrl}"`, { stdio: "ignore", detached: true, shell: true }).on(
+      "error",
+      () => {} // si no se puede abrir solo, el usuario copia la URL
+    );
+  } else {
+    const opener = process.platform === "darwin" ? "open" : "xdg-open";
+    spawn(opener, [authUrl], { stdio: "ignore", detached: true }).on("error", () => {});
+  }
 });

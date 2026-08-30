@@ -1,0 +1,66 @@
+{
+  // Al abrir esta carpeta en VS Code se ejecuta la tarea "🚀 Arrancar todo",
+  // que encadena: Docker -> Supabase -> pnpm dev (espera a que esté listo) -> pnpm poll.
+  // La primera vez VS Code pedirá permiso: "Allow Automatic Tasks" / "Permitir tareas automáticas".
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1 · Docker: iniciar y esperar",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/.vscode/wait-docker.ps1"
+      ],
+      "presentation": { "reveal": "always", "panel": "shared", "group": "startup", "clear": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "2 · Supabase: start",
+      "type": "shell",
+      "command": "supabase start",
+      "dependsOn": ["1 · Docker: iniciar y esperar"],
+      "dependsOrder": "sequence",
+      "presentation": { "reveal": "always", "panel": "shared", "group": "startup" },
+      "problemMatcher": []
+    },
+    {
+      "label": "3 · App: pnpm dev",
+      "type": "shell",
+      "command": "pnpm dev",
+      "dependsOn": ["2 · Supabase: start"],
+      "dependsOrder": "sequence",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "startup" },
+      "problemMatcher": {
+        "owner": "nextdev",
+        "pattern": { "regexp": "____never_match____", "file": 1, "line": 2, "column": 3, "message": 4 },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "(?i)(next\\.js|starting|compiling)",
+          "endsPattern": "(?i)(ready in|local:.*http|started server|compiled)"
+        }
+      }
+    },
+    {
+      "label": "🚀 Arrancar todo",
+      "type": "shell",
+      "command": "pnpm poll",
+      "dependsOn": ["3 · App: pnpm dev"],
+      "dependsOrder": "sequence",
+      "presentation": { "reveal": "always", "panel": "dedicated", "group": "startup" },
+      "problemMatcher": [],
+      "runOptions": { "runOn": "folderOpen" }
+    },
+    {
+      "label": "Poll: leer correos (manual)",
+      "type": "shell",
+      "command": "pnpm poll",
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -25,7 +25,9 @@ export default function Dashboard() {
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [filter, setFilter] = useState<TxFilter>(EMPTY_FILTER);
 
-  // Filtro compartido por gráficas y tabla (fecha + categoría).
+  const filterActive = Boolean(filter.from || filter.to || filter.category);
+
+  // Filtro compartido por tarjetas, gráficas y tabla (fecha + categoría).
   const filtered = useMemo(
     () =>
       transactions.filter((t) => {
@@ -144,7 +146,7 @@ export default function Dashboard() {
         <p className="text-sm text-[var(--muted)]">Cargando…</p>
       ) : (
         <div className="flex flex-col gap-6">
-          <BalanceCard transactions={transactions} />
+          <BalanceCard transactions={filtered} filterActive={filterActive} />
           <Filters
             value={filter}
             onChange={setFilter}

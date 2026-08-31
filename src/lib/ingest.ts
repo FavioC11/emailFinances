@@ -38,15 +38,6 @@ export interface IngestResult {
   sources: Record<string, { fetched: number; inserted: number; error?: string }>;
 }
 
-// Pagos que no son gasto real: se pagan a un gateway (ZiPago) solo para
-// mantener movimiento en la tarjeta de crédito, y el dinero vuelve — no
-// deben registrarse como egreso.
-const EXCLUDED_COUNTERPARTY = [/zipago/i];
-
-function isExcludedCounterparty(counterparty: string | null): boolean {
-  return counterparty != null && EXCLUDED_COUNTERPARTY.some((p) => p.test(counterparty));
-}
-
 // Lee correos nuevos de cada fuente activa, parsea, categoriza y hace upsert.
 // Compartido por el cron protegido (/api/ingest) y el botón del dashboard (/api/sync).
 export async function runIngest(): Promise<IngestResult> {
@@ -64,6 +55,19 @@ export async function runIngest(): Promise<IngestResult> {
     .select("name,keywords")
     .order("orden", { ascending: true });
   const rules: CategoryRule[] = (cats ?? []).filter((c) => c.name !== "Sin categoría");
+
+  // Exclusiones configurables (antes fijas en el código): si la contraparte
+  // contiene alguno de estos patrones, el movimiento no se registra.
+  const { data: exRows } = await db
+    .from("exclusions")
+    .select("pattern")
+    .eq("active", true);
+  const exclusions = (exRows ?? [])
+    .map((r) => String(r.pattern).trim().toLowerCase())
+    .filter(Boolean);
+  const isExcludedCounterparty = (counterparty: string | null): boolean =>
+    counterparty != null &&
+    exclusions.some((p) => counterparty.toLowerCase().includes(p));
 
   let inserted = 0;
   let skipped = 0;

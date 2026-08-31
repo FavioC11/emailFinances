@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Transaction } from "@/lib/types";
 import type { CategoryOption } from "@/lib/categories";
 import BalanceCard from "@/components/BalanceCard";
 import Charts from "@/components/Charts";
 import TxTable from "@/components/TxTable";
+import Filters, { type TxFilter } from "@/components/Filters";
 import ManualEntryForm from "@/components/ManualEntryForm";
 import AskAI from "@/components/AskAI";
 import CategoryManager from "@/components/CategoryManager";
+
+const EMPTY_FILTER: TxFilter = { from: "", to: "", category: "" };
 
 type Tab = "dashboard" | "categorias";
 
@@ -20,6 +23,24 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
+  const [filter, setFilter] = useState<TxFilter>(EMPTY_FILTER);
+
+  // Filtro compartido por gráficas y tabla (fecha + categoría).
+  const filtered = useMemo(
+    () =>
+      transactions.filter((t) => {
+        const day = t.occurred_at.slice(0, 10);
+        if (filter.from && day < filter.from) return false;
+        if (filter.to && day > filter.to) return false;
+        if (
+          filter.category &&
+          (t.category ?? "Sin categoría") !== filter.category
+        )
+          return false;
+        return true;
+      }),
+    [transactions, filter]
+  );
 
   const refresh = useCallback(async () => {
     try {
@@ -124,13 +145,19 @@ export default function Dashboard() {
       ) : (
         <div className="flex flex-col gap-6">
           <BalanceCard transactions={transactions} />
-          <Charts transactions={transactions} categories={categories} />
+          <Filters
+            value={filter}
+            onChange={setFilter}
+            categories={categories}
+            count={filtered.length}
+          />
+          <Charts transactions={filtered} categories={categories} />
           <div className="grid gap-6 lg:grid-cols-2">
             <ManualEntryForm categories={categories} onSaved={refresh} />
             <AskAI />
           </div>
           <TxTable
-            transactions={transactions}
+            transactions={filtered}
             categories={categories}
             onChanged={refresh}
           />

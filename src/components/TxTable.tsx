@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Transaction } from "@/lib/types";
+import { groupCategories, type CategoryOption } from "@/lib/categories";
 import { formatDateTime, formatMoney } from "@/lib/format";
 
 export default function TxTable({
@@ -10,9 +11,10 @@ export default function TxTable({
   onChanged,
 }: {
   transactions: Transaction[];
-  categories: string[];
+  categories: CategoryOption[];
   onChanged: () => void;
 }) {
+  const grouped = useMemo(() => groupCategories(categories), [categories]);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [category, setCategory] = useState("");
@@ -65,10 +67,14 @@ export default function TxTable({
           Categoría
           <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
             <option value="">Todas</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+            {grouped.map((g) => (
+              <optgroup key={g.grupo} label={g.grupo}>
+                {g.items.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
@@ -109,10 +115,14 @@ export default function TxTable({
                     onChange={(e) => updateCategory(t.id, e.target.value)}
                     className="rounded-md border border-[var(--hairline)] bg-transparent px-2 py-1 text-xs"
                   >
-                    {categories.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
+                    {grouped.map((g) => (
+                      <optgroup key={g.grupo} label={g.grupo}>
+                        {g.items.map((c) => (
+                          <option key={c.name} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </td>

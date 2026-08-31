@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { GROUP_ORDER } from "@/lib/categories";
 
 interface Category {
   id: string;
   name: string;
   keywords: string[];
+  grupo: string | null;
+  orden?: number;
 }
 
 const DEFAULT_CATEGORY = "Sin categoría";
+const GRUPO_OPTIONS = GROUP_ORDER;
 
 export default function CategoryManager({
   onChanged,
@@ -22,13 +26,30 @@ export default function CategoryManager({
   // Alta
   const [newName, setNewName] = useState("");
   const [newKeywords, setNewKeywords] = useState("");
+  const [newGrupo, setNewGrupo] = useState<string>(GRUPO_OPTIONS[0]);
   const [creating, setCreating] = useState(false);
 
   // Edición inline
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editKeywords, setEditKeywords] = useState("");
+  const [editGrupo, setEditGrupo] = useState<string>("");
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  // Lista agrupada por grupo, en el orden canónico (grupos desconocidos al final).
+  const groupedList = useMemo(() => {
+    const buckets = new Map<string, Category[]>();
+    for (const c of categories) {
+      const g = c.grupo && GRUPO_OPTIONS.includes(c.grupo) ? c.grupo : "Otras";
+      const list = buckets.get(g) ?? [];
+      list.push(c);
+      buckets.set(g, list);
+    }
+    const order = [...GRUPO_OPTIONS, "Otras"];
+    return order
+      .map((g) => ({ grupo: g, items: buckets.get(g) ?? [] }))
+      .filter((b) => b.items.length);
+  }, [categories]);
 
   const refresh = useCallback(async () => {
     try {
@@ -66,6 +87,7 @@ export default function CategoryManager({
         body: JSON.stringify({
           name: newName.trim(),
           keywords: parseKeywords(newKeywords),
+          grupo: newGrupo,
         }),
       });
       const data = await res.json();
@@ -85,12 +107,14 @@ export default function CategoryManager({
     setEditingId(c.id);
     setEditName(c.name);
     setEditKeywords(c.keywords.join(", "));
+    setEditGrupo(c.grupo ?? "");
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditName("");
     setEditKeywords("");
+    setEditGrupo("");
   };
 
   const saveEdit = async (id: string) => {
@@ -104,6 +128,7 @@ export default function CategoryManager({
           id,
           name: editName.trim(),
           keywords: parseKeywords(editKeywords),
+          grupo: editGrupo,
         }),
       });
       const data = await res.json();
@@ -162,7 +187,7 @@ export default function CategoryManager({
           Las <em>palabras clave</em> (separadas por comas) sirven para
           categorizar automáticamente los movimientos según la contraparte.
         </p>
-        <form onSubmit={create} className="grid gap-3 sm:grid-cols-[1fr_2fr_auto]">
+        <form onSubmit={create} className="grid gap-3 sm:grid-cols-[1fr_1fr_2fr_auto]">
           <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
             Nombre
             <input
@@ -173,6 +198,20 @@ export default function CategoryManager({
               className={inputCls}
               placeholder="Ej. Salud"
             />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
+            Grupo
+            <select
+              value={newGrupo}
+              onChange={(e) => setNewGrupo(e.target.value)}
+              className={inputCls}
+            >
+              {GRUPO_OPTIONS.map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
             Palabras clave
@@ -210,16 +249,27 @@ export default function CategoryManager({
               <thead>
                 <tr className="border-b border-[var(--grid)] text-left text-xs uppercase tracking-wide text-[var(--muted)]">
                   <th className="py-2 pr-4">Nombre</th>
+                  <th className="py-2 pr-4">Grupo</th>
                   <th className="py-2 pr-4">Palabras clave</th>
                   <th className="py-2 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {categories.map((c) => {
-                  const isDefault = c.name === DEFAULT_CATEGORY;
-                  const isEditing = editingId === c.id;
-                  const busy = busyId === c.id;
-                  return (
+                {groupedList.map((bucket) => (
+                  <Fragment key={bucket.grupo}>
+                    <tr className="bg-[var(--page)]">
+                      <td
+                        colSpan={4}
+                        className="py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]"
+                      >
+                        {bucket.grupo}
+                      </td>
+                    </tr>
+                    {bucket.items.map((c) => {
+                      const isDefault = c.name === DEFAULT_CATEGORY;
+                      const isEditing = editingId === c.id;
+                      const busy = busyId === c.id;
+                      return (
                     <tr
                       key={c.id}
                       className="border-b border-[var(--grid)] align-top last:border-0"
@@ -234,6 +284,26 @@ export default function CategoryManager({
                           />
                         ) : (
                           <span className="font-medium">{c.name}</span>
+                        )}
+                      </td>
+                      <td className="py-2 pr-4">
+                        {isEditing ? (
+                          <select
+                            value={editGrupo}
+                            onChange={(e) => setEditGrupo(e.target.value)}
+                            className={inputCls}
+                          >
+                            <option value="">— sin grupo —</option>
+                            {GRUPO_OPTIONS.map((g) => (
+                              <option key={g} value={g}>
+                                {g}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-xs text-[var(--ink-2)]">
+                            {c.grupo ?? "—"}
+                          </span>
                         )}
                       </td>
                       <td className="py-2 pr-4">
@@ -302,11 +372,13 @@ export default function CategoryManager({
                         )}
                       </td>
                     </tr>
-                  );
-                })}
+                      );
+                    })}
+                  </Fragment>
+                ))}
                 {categories.length === 0 && (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-[var(--muted)]">
+                    <td colSpan={4} className="py-8 text-center text-[var(--muted)]">
                       Aún no hay categorías. Crea la primera arriba.
                     </td>
                   </tr>

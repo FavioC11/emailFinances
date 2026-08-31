@@ -28,14 +28,16 @@ export async function GET(req: NextRequest) {
 
   const [{ data: transactions, error }, { data: categories }] = await Promise.all([
     query,
-    db.from("categories").select("name").order("name"),
+    // Ordenadas por `orden` (prioridad de match) y luego por nombre; el front
+    // las agrupa por `grupo` en los dropdowns.
+    db.from("categories").select("name,grupo").order("orden").order("name"),
   ]);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   return NextResponse.json({
     transactions: transactions ?? [],
-    categories: (categories ?? []).map((c) => c.name),
+    categories: categories ?? [],
   });
 }
 

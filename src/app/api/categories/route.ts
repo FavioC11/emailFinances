@@ -16,11 +16,12 @@ function cleanKeywords(input: unknown): string[] {
   return [...seen];
 }
 
-// GET /api/categories — lista con sus keywords
+// GET /api/categories — lista con sus keywords, grupo y orden
 export async function GET() {
   const { data, error } = await sbAdmin()
     .from("categories")
-    .select("id,name,keywords")
+    .select("id,name,keywords,grupo,orden")
+    .order("orden")
     .order("name");
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -30,16 +31,17 @@ export async function GET() {
 
 // POST /api/categories — crear categoría
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as { name?: string; keywords?: unknown };
+  const body = (await req.json()) as { name?: string; keywords?: unknown; grupo?: string };
   const name = body.name?.trim();
   if (!name) {
     return NextResponse.json({ error: "El nombre es obligatorio" }, { status: 400 });
   }
+  const grupo = body.grupo?.trim() || null;
 
   const { data, error } = await sbAdmin()
     .from("categories")
-    .insert({ name, keywords: cleanKeywords(body.keywords) })
-    .select("id,name,keywords")
+    .insert({ name, keywords: cleanKeywords(body.keywords), grupo })
+    .select("id,name,keywords,grupo,orden")
     .single();
   if (error) {
     const msg = error.code === "23505" ? "Ya existe una categoría con ese nombre" : error.message;
@@ -50,12 +52,17 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/categories — editar nombre y/o keywords
 export async function PATCH(req: NextRequest) {
-  const body = (await req.json()) as { id?: string; name?: string; keywords?: unknown };
+  const body = (await req.json()) as {
+    id?: string;
+    name?: string;
+    keywords?: unknown;
+    grupo?: string;
+  };
   if (!body.id) {
     return NextResponse.json({ error: "id es obligatorio" }, { status: 400 });
   }
 
-  const update: { name?: string; keywords?: string[] } = {};
+  const update: { name?: string; keywords?: string[]; grupo?: string | null } = {};
   if (body.name !== undefined) {
     const name = body.name.trim();
     if (!name) {
@@ -66,12 +73,15 @@ export async function PATCH(req: NextRequest) {
   if (body.keywords !== undefined) {
     update.keywords = cleanKeywords(body.keywords);
   }
+  if (body.grupo !== undefined) {
+    update.grupo = body.grupo.trim() || null;
+  }
 
   const { data, error } = await sbAdmin()
     .from("categories")
     .update(update)
     .eq("id", body.id)
-    .select("id,name,keywords")
+    .select("id,name,keywords,grupo,orden")
     .single();
   if (error) {
     const msg = error.code === "23505" ? "Ya existe una categoría con ese nombre" : error.message;

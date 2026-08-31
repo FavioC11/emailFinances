@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Transaction } from "@/lib/types";
+import type { CategoryOption } from "@/lib/categories";
 import BalanceCard from "@/components/BalanceCard";
 import Charts from "@/components/Charts";
 import TxTable from "@/components/TxTable";
@@ -14,9 +15,11 @@ type Tab = "dashboard" | "categorias";
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -33,19 +36,59 @@ export default function Dashboard() {
     }
   }, []);
 
+  const sync = useCallback(async () => {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch("/api/sync", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      const errs = Object.values(
+        data.sources as Record<string, { error?: string }>
+      )
+        .map((s) => s.error)
+        .filter(Boolean);
+      setSyncMsg(
+        `Listo: ${data.inserted} nuevos, ${data.skipped} omitidos.` +
+          (errs.length ? ` ⚠️ ${errs.join(" · ")}` : "")
+      );
+      await refresh();
+    } catch (err) {
+      setSyncMsg(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSyncing(false);
+    }
+  }, [refresh]);
+
   useEffect(() => {
     refresh();
   }, [refresh]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Finanzas por Correo
-        </h1>
-        <p className="mt-1 text-sm text-[var(--ink-2)]">
-          Yape y BCP leídos de tu correo, categorizados y listos para analizar.
-        </p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Finanzas por Correo
+          </h1>
+          <p className="mt-1 text-sm text-[var(--ink-2)]">
+            Yape y BCP leídos de tu correo, categorizados y listos para analizar.
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={sync}
+            disabled={syncing}
+            className="rounded-lg bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface)] disabled:opacity-50"
+          >
+            {syncing ? "Actualizando…" : "Actualizar desde correo"}
+          </button>
+          {syncMsg && (
+            <span className="max-w-xs text-right text-xs text-[var(--ink-2)]">
+              {syncMsg}
+            </span>
+          )}
+        </div>
       </header>
 
       <nav className="mb-8 flex gap-1 border-b border-[var(--grid)]">

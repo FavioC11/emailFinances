@@ -15,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import type { Transaction } from "@/lib/types";
+import type { CategoryOption } from "@/lib/categories";
 import { formatMoney } from "@/lib/format";
 
 const INGRESO = "#2a78d6";
@@ -33,8 +34,9 @@ export default function Charts({
   categories,
 }: {
   transactions: Transaction[];
-  categories: string[];
+  categories: CategoryOption[];
 }) {
+  const categoryNames = categories.map((c) => c.name);
   const daily = useMemo(() => {
     const map = new Map<string, { ingresos: number; egresos: number }>();
     for (const t of transactions) {
@@ -69,7 +71,7 @@ export default function Charts({
 
   const colorFor = (name: string) => {
     if (name === "Sin categoría") return UNCATEGORIZED_COLOR;
-    const idx = categories.filter((c) => c !== "Sin categoría").indexOf(name);
+    const idx = categoryNames.filter((c) => c !== "Sin categoría").indexOf(name);
     return idx >= 0 ? CAT_COLORS[idx % CAT_COLORS.length] : UNCATEGORIZED_COLOR;
   };
 

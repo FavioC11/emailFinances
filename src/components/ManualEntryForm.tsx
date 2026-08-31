@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { groupCategories, type CategoryOption } from "@/lib/categories";
 
 export default function ManualEntryForm({
   categories,
   onSaved,
 }: {
-  categories: string[];
+  categories: CategoryOption[];
   onSaved: () => void;
 }) {
+  const grouped = groupCategories(categories);
   const [direction, setDirection] = useState<"ingreso" | "egreso">("egreso");
   const [amount, setAmount] = useState("");
   const [occurredAt, setOccurredAt] = useState("");
@@ -95,10 +97,14 @@ export default function ManualEntryForm({
             onChange={(e) => setCategory(e.target.value)}
             className={inputCls}
           >
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+            {grouped.map((g) => (
+              <optgroup key={g.grupo} label={g.grupo}>
+                {g.items.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>

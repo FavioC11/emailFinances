@@ -64,6 +64,44 @@ function extractBody(payload: GmailPart | undefined): string {
   return "";
 }
 
+// Descarga hasta `limit` items en paralelo (no todos a la vez, para no
+// gatillar el rate limit de Gmail) reintentando una vez ante 429 o errores de
+// red transitorios (la corrida completa puede tardar minutos, así que un
+// corte de red pasajero no debe tirar abajo todo el proceso).
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
+async function fetchWithRetry(url: string | URL, headers: Record<string, string>): Promise<Response> {
+  try {
+    const res = await fetch(url, { headers });
+    if (res.status === 429 || res.status >= 500) {
+      await new Promise((r) => setTimeout(r, 1000));
+      return fetch(url, { headers });
+    }
+    return res;
+  } catch {
+    // ECONNRESET / "fetch failed" / "terminated" — un solo reintento
+    await new Promise((r) => setTimeout(r, 1000));
+    return fetch(url, { headers });
+  }
+}
+
+const CONCURRENCY = 8;
+
 export async function fetchGmail(from: string, sinceIso: string): Promise<IncomingEmail[]> {
   const token = await getAccessToken();
   const headers = { authorization: `Bearer ${token}` };
@@ -79,7 +117,7 @@ export async function fetchGmail(from: string, sinceIso: string): Promise<Incomi
     url.searchParams.set("q", q);
     url.searchParams.set("maxResults", "100");
     if (pageToken) url.searchParams.set("pageToken", pageToken);
-    const res = await fetch(url, { headers });
+    const res = await fetchWithRetry(url, headers);
     if (!res.ok) throw new Error(`Gmail list error ${res.status}: ${await res.text()}`);
     const data = (await res.json()) as {
       messages?: { id: string }[];
@@ -89,22 +127,20 @@ export async function fetchGmail(from: string, sinceIso: string): Promise<Incomi
     pageToken = data.nextPageToken;
   } while (pageToken);
 
-  const emails: IncomingEmail[] = [];
-  for (const id of ids) {
-    const res = await fetch(`${GMAIL_API}/messages/${id}?format=full`, { headers });
+  return mapWithConcurrency(ids, CONCURRENCY, async (id) => {
+    const res = await fetchWithRetry(`${GMAIL_API}/messages/${id}?format=full`, headers);
     if (!res.ok) throw new Error(`Gmail get error ${res.status}: ${await res.text()}`);
     const msg = (await res.json()) as {
       id: string;
       internalDate?: string;
       payload?: GmailPart;
     };
-    emails.push({
+    return {
       id: msg.id,
       text: extractBody(msg.payload),
       receivedAt: msg.internalDate
         ? new Date(Number(msg.internalDate)).toISOString()
         : new Date().toISOString(),
-    });
-  }
-  return emails;
+    };
+  });
 }

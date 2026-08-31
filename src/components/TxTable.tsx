@@ -15,22 +15,7 @@ export default function TxTable({
   onChanged: () => void;
 }) {
   const grouped = useMemo(() => groupCategories(categories), [categories]);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [category, setCategory] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
-
-  const filtered = useMemo(
-    () =>
-      transactions.filter((t) => {
-        const day = t.occurred_at.slice(0, 10);
-        if (from && day < from) return false;
-        if (to && day > to) return false;
-        if (category && (t.category ?? "Sin categoría") !== category) return false;
-        return true;
-      }),
-    [transactions, from, to, category]
-  );
 
   const updateCategory = async (id: string, newCategory: string) => {
     setSavingId(id);
@@ -46,38 +31,12 @@ export default function TxTable({
     }
   };
 
-  const inputCls =
-    "rounded-lg border border-[var(--hairline)] bg-[var(--surface)] px-3 py-1.5 text-sm";
-
   return (
     <section className="rounded-xl border border-[var(--hairline)] bg-[var(--surface)] p-5">
       <div className="mb-4 flex flex-wrap items-end gap-3">
         <h2 className="mr-auto text-sm font-medium text-[var(--ink-2)]">
-          Movimientos ({filtered.length})
+          Movimientos ({transactions.length})
         </h2>
-        <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
-          Desde
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={inputCls} />
-        </label>
-        <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
-          Hasta
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={inputCls} />
-        </label>
-        <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
-          Categoría
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
-            <option value="">Todas</option>
-            {grouped.map((g) => (
-              <optgroup key={g.grupo} label={g.grupo}>
-                {g.items.map((c) => (
-                  <option key={c.name} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
       </div>
 
       <div className="overflow-x-auto">
@@ -92,14 +51,14 @@ export default function TxTable({
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 && (
+            {transactions.length === 0 && (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-[var(--muted)]">
                   No hay movimientos con esos filtros.
                 </td>
               </tr>
             )}
-            {filtered.map((t) => (
+            {transactions.map((t) => (
               <tr key={t.id} className="border-b border-[var(--grid)] last:border-0">
                 <td className="whitespace-nowrap py-2 pr-4 text-[var(--ink-2)]">
                   {formatDateTime(t.occurred_at)}

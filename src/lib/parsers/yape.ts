@@ -11,7 +11,12 @@ export function parseYape(text: string): ParsedTransaction {
   const rawDate =
     text.match(/Fecha y Hora de la operaci[óo]n\s*(.+?)\s{2,}/i)?.[1]
     ?? text.match(/(\d{1,2}\s+\w+\s+\d{4}\s*-\s*[\d:]+\s*[ap]\.?\s*m\.?)/i)?.[1];
-  const direction = /Acabas de yapear/i.test(text) ? "egreso" : "ingreso";
+  // "Acabas de yapear" es la redacción actual; "Yapeaste S/X a Y" es una
+  // redacción anterior de Yape para el mismo tipo de evento (envío).
+  const direction =
+    /Acabas de yapear|Yapeaste\s+S\/\s*[\d,]+\.\d{2}\s+a\b/i.test(text)
+      ? "egreso"
+      : "ingreso";
   return {
     amount: amount ? Number(amount.replace(/,/g, "")) : null,
     counterparty,

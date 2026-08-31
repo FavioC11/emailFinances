@@ -18,16 +18,9 @@ const MONTHS: Record<string, string> = {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function parseSpanishDate(raw: string): string | null {
-  const s = raw.toLowerCase().replace(/\s+/g, " ").trim();
-
-  const dm = s.match(/(\d{1,2})\s*(?:de\s+)?([a-záéíóúñ]+)\.?\s*(?:de\s+)?(\d{4})/);
-  if (!dm) return null;
-  const day = Number(dm[1]);
-  const month = MONTHS[dm[2].replace(/\./g, "")];
-  const year = Number(dm[3]);
-  if (!month || day < 1 || day > 31) return null;
-
+// Busca hh:mm[:ss] + am/pm (si hay) en `s`, mirando solo lo que viene DESPUÉS
+// de la hora para no confundir la "p" de "septiembre" con "p.m.".
+function extractTime(s: string): { hour: number; minute: number; second: number } {
   let hour = 0;
   let minute = 0;
   let second = 0;
@@ -37,13 +30,42 @@ export function parseSpanishDate(raw: string): string | null {
     minute = Number(tm[2]);
     second = tm[3] ? Number(tm[3]) : 0;
 
-    // Solo mirar después de la hora para no confundir la "p" de "septiembre"
     const tail = s.slice((tm.index ?? 0) + tm[0].length);
     const isPm = /^\s*p\.?\s*m\.?/i.test(tail) || /^\s*pm\b/i.test(tail);
     const isAm = /^\s*a\.?\s*m\.?/i.test(tail) || /^\s*am\b/i.test(tail);
     if (isPm && hour < 12) hour += 12;
     if (isAm && hour === 12) hour = 0;
   }
+  return { hour, minute, second };
+}
 
+export function parseSpanishDate(raw: string): string | null {
+  const s = raw.toLowerCase().replace(/\s+/g, " ").trim();
+
+  const dm = s.match(
+    /(\d{1,2})\s*(?:del?\s+)?([a-záéíóúñ]+)\.?\s*,?\s*(?:del?\s+)?(\d{4})/
+  );
+  if (!dm) return null;
+  const day = Number(dm[1]);
+  const month = MONTHS[dm[2].replace(/\./g, "")];
+  const year = Number(dm[3]);
+  if (!month || day < 1 || day > 31) return null;
+
+  const { hour, minute, second } = extractTime(s);
   return `${year}-${month}-${pad(day)}T${pad(hour)}:${pad(minute)}:${pad(second)}-05:00`;
+}
+
+// Fechas numéricas ("28/08/2026", "27/08/2026 a las 00:33:07") de bancos que
+// no usan el nombre del mes en español.
+export function parseSlashDate(raw: string): string | null {
+  const s = raw.toLowerCase().trim();
+  const dm = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!dm) return null;
+  const day = Number(dm[1]);
+  const month = Number(dm[2]);
+  const year = Number(dm[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  const { hour, minute, second } = extractTime(s);
+  return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:${pad(second)}-05:00`;
 }

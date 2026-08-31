@@ -1,0 +1,556 @@
+formato 1
+El pago de tu servicio se realizó de manera exitosa
+Inbox
+
+iO Notificaciones <notificaciones@io.pe>
+3:08 PM (1 hour ago)
+to me
+
+It looks like this message is in English
+io logo	
+Menos banco,
+
+más tú.
+
+Hola, Elvis Andair
+El pago de tu servicio se realizó de manera exitosa
+Detalle del pago de servicio
+Fecha:	Lunes, 31 de agosto del 2026
+Hora:	03:08 p.m.
+Monto pagado:	S/30.90
+Nombre de pago favorito:	Cel papá
+Empresa:	Bitel
+Tipo de servicio:	Postpago Bitel
+Código de usuario:	935310005
+Títular:	Le*** Va*****
+Código de operación:	2033126
+Listos para ayudarte las 24 horas del día, todos los días
+Si tienes alguna duda o necesitas ayuda, contáctanos por:
+
+	
+Aplicación iO:
+
+Escríbenos a nuestro Chat
+
+	
+Call center:
+
+Llámanos al (01) 644 1010
+
+--------------------------------------
+formato 2
+ENVIO AUTOMATICO - CONSTANCIA DE PAGO DE SERVICIO - BANCA MOVIL BCP
+Inbox
+
+BCP Notificaciones <notificaciones@notificacionesbcp.com.pe>
+3:04 PM (1 hour ago)
+to me
+
+
+Hola ELVIS ANDAIR,
+
+¡Tu operación se realizó con éxito!
+
+ 
+	 	
+Operación realizada:
+
+Pago de servicios
+
+ 
+	 	
+Número de operación:
+
+03318767
+
+ 
+Fecha y hora:	Lunes, 31 Agosto 2026 - 03:04 P. M.
+Empresa:	ZIPAGO
+Servicio:	COMERCIO SOLES
+Titular del servicio:	Servicios generales
+Código de usuario:	BANANADECORA
+Cuenta de origen:	Tarjeta de crédito
+**** 3791
+ELVIS ANDAIR
+Monto total:	S/ 2500.00
+ 
+
+ 
+	 	
+Si deseas verificar la operación, puedes hacerlo en nuestra Banca por Internet VíaBCP, en nuestro servicio de Banca por Teléfono (01) 311-9898 o en cualquiera de nuestras oficinas a nivel nacional.
+El sistema de correo electrónico del Banco de Crédito BCP está destinado únicamente para fines del negocio, cualquier otro uso contraviene las políticas del Banco.
+Toda la información del negocio contenida en este mensaje es confidencial y de uso exclusivo del Banco de Crédito BCP. Su divulgación, copia y/o adulteración están prohibidas y sólo debe ser conocida por la persona a quien se dirige este mensaje. Si Ud. ha recibido este mensaje por error por favor proceda a eliminarlo y notificar al remitente.
+
+-------------------------------------
+formato 3
+Servicios generales - [NOTIFICACIÓN ZIPAGO - 31/08/2026 15:05:17]
+Inbox
+
+Notificación ZiPago <notificacion@zipago.pe>
+3:05 PM (1 hour ago)
+to me, ZiPago
+
+Servicio: ZIPAGO COMERCIO SOLES
+
+Se ha recibido un pago en el Banco BCP
+Importe pago: 2,500.00 nuevos soles
+Fecha del pago: 31/08/2026 15:05:15
+Número de operación: 000005485735
+Código de comercio: BANANADECORA
+Nombre de comercio: SERVICIOS GENERALES
+
+Documento pagado: 2026010032
+Documento referencia: SERVICIOS GENERALES
+Comisión ZiPago: 9.00 nuevos soles
+Importe neto a recibir: 2,491.00 nuevos soles
+
+Los depósitos se realizan de lunes a sábado, excepto feriados.
+Cualquier duda por favor comuníquese con el servicio ZiPago al correo [servicioalcliente@zipago.pe]
+...
+
+[Message clipped]  View entire message
+---------------------------------------------------
+formato 4
+BBVA - Constancia Pago de servicios
+Inbox
+
+BBVA <procesos@bbva.com.pe>
+2:58 PM (1 hour ago)
+to me
+
+
+Hola, Elvis Andair
+Has realizado con éxito la operación:
+
+Pagar servicio
+
+Importe pagado
+
+S/ 2500.00
+
+Comisión	S/ 0.00
+Importe cargado	S/ 2500.00
+Importe del documento	S/ 2500.00
+
+
+DETALLES DE LA OPERACIÓN
+Tipo de operación
+
+Pagar servicio
+
+Número de operación
+
+000557601
+
+Fecha y hora de la operación
+
+31 agosto, 2026 14:58
+
+Cargo en tarjeta
+
+• 6650
+
+ID DE COMERCIO
+
+BANANADECORA
+
+Nombre de servicio
+
+ZIPAGO COMERCIO MN
+
+Descripción o Número Documento Servicio
+
+2026010032
+
+Recuerda que, por ningún medio de comunicación ni por ningún motivo, te pediremos tus datos confidenciales, tales como clave de cajero, clave de Token digital o contraseña de la Banca por Internet y App BBVA.
+
+Si crees que este correo es sospechoso, por favor reenvíalo a la dirección bbvaseguridadl.pe@bbva.com para confirmar que es seguro y puedas estar tranquilo.
+Muchas gracias,
+----------------------------------------------
+formato 5
+Elvis, realizaste un consumo con tu Tarjeta Interbank Visa Clásica
+Inbox
+
+Servicio al cliente <servicioalcliente@netinterbank.com.pe> Unsubscribe
+Fri, Aug 28, 9:53 PM (3 days ago)
+to me
+
+Interbank	
+Elvis, realizaste un consumo con tu Tarjeta Interbank Visa Clásica
+Conoce el detalle:
+Tarjeta: ****1600
+Comercio: E S ESPANA LISTO
+Monto: S/. 9.80
+Fecha: 28/08/2026
+Hora: 09:53 PM
+¿Vas a comprar por internet?​
+Realiza tu pago consultando el número, fecha de vencimiento y CVV de tu tarjeta en tu Interbank APP.
+Interbank
+Si no reconoces esta operación llámanos al 01-3119037
+Interbank
+Tu seguridad nos importa:
+En Interbank, nunca te pediremos: Tu clave, Número de tarjeta y/o cuenta, código CVV, código de seguridad para concretar transacciones ni la devolución de tu tarjeta, mediante ningún correo, red social, llamada o SMS. Si recibes estas solicitudes, por favor no respondas.
+Interbank	
+Consulta tasas de interés, comisiones, gastos y penalidades en el tarifario, en Tiendas Interbank o en www.interbank.pe, conforme a la normativa vigente.
+Interbank se preocupa por tu seguridad y tranquilidad, por eso te informamos que:
+	
+Interbank nunca te solicitará, por ningún medio, que informes tu clave secreta (de cajero o internet).
+	
+Nuestros correos electrónicos no incluirán archivos adjuntos (a excepción del envío de los estados de cuenta u otros documentos, solicitados y/o coordinados previamente con nosotros).
+	
+Nuestros correos personalizados con botón o link, únicamente te podrán dirigir: (i) a las siguientes direcciones: https://www.interbank.pe/, https://www.interbankbenefit.pe/, https://maestroquedejahuella.com.pe/, https://www.micomisariamiorgullo.pe/, https://www.trabajaeninterbank.pe, https://www.shopstar.pe, https://micasapropia.interbank.pe, https://interseguro.pe, https://www.aprendemasinterbank.pe/, https://plin.pe/, https://iziya.pe/, https://interbankpe.connect.datamart.co/interbank-pn/index.html; (ii), a nuestro canal oficial de Youtube "Interbank Perú" que podrás identificar con la siguiente dirección como https://www.youtube.com/user/InterbankDigital; o (iii) a la cuenta "Banco Internacional del Perú – Interbank" dentro de la tienda de aplicaciones móviles por defecto en tu celular (Google Play y App Store), (iv) al canal de difusión por WhatsApp oficial de Interbank que podrás identificar con el número 993119040 y con el ícono de verificación al costado, (v) a nuestro número oficial de Plin WhatsApp que podrás identificar con el número 993119086.
+	
+Nuestros mensajes por WhatsApp solamente se enviarán desde el número remitente 993119040.
+	
+Solo debes de ingresar a nuestra página web, digitando en el navegador de internet, la dirección www.interbank.pe. Evita hacerlo a través de buscadores (Google, Yahoo!, etc.).
+	
+Puede reconocer las cuentas oficiales de Interbank en las tiendas de aplicaciones móviles identificando a "Banco Internacional del Perú – Interbank" como desarrollador. Por ejemplo, aplicaciones como Interbank APP, Cuenta Sueldo Interbank App y Crédito por Convenio Interbank.
+	
+Nuestros mensajes de texto con enlace solamente se enviarán desde el número remitente 312 22, además podrán derivarte al número de WhatsApp Oficial de Interbank 993 119000.
+	
+Si tienes alguna duda de la autenticidad de un correo de Interbank, antes de abrirlo, reenvíalo a
+correos-sospechosos@intercorp.com.pe.
+Si no deseas recibir más promociones por esta vía envía un correo electrónico a librodereclamaciones@intercorp.com.pe con el asunto NO DESEO MÁS CORREOS.
+------------------------------------
+formato 6
+Constancia de operación - Transferencia Plin
+Inbox
+
+Scotiabank <bancadigital@scotiabank.com.pe>
+Thu, Aug 27, 12:33 AM (4 days ago)
+to me
+
+Hola Elvis,
+
+Esta es la constancia de tu transferencia Plin:
+
+Logo Scotiabank
+
+27 ago., 12:33 am
+
+Transferencia Plin
+
+Número de operación 784.445.001.2021
+
+Cuenta de origen:
+
+Cuenta Digital SBP
+
+*** ***3234
+
+Monto enviado:
+
+S/ 30.00
+
+Destino:
+
+Plin
+
+Comisión:
+
+Gratis
+
+Enviado a:
+
+Jhonatan Rag***
+
+*** *** 110
+
+	
+Con Plin envías dinero gratis,
+de inmediato y a toda hora.
+
+Muchas gracias.
+
+Nota: Mensaje automático, por favor no responder.
+-------------------------------------
+formato 7
+Constancia de operación - Recepción Transferencia Plin
+Inbox
+
+bancadigital@scotiabank.com.pe
+Thu, Aug 27, 12:33 AM (4 days ago)
+to me
+
+
+Hola ELVIS,                                                                       
+Esta es la constancia de la transferencia que has recibido:                       
+------------------------------------------------                                 
+Monto recibido: S/ 9.00                                                           
+Destino: Cuenta Digital Scotiabank *** ***3234                                   
+Fecha y hora: 27/08/2026 a las 00:33:07                                           
+------------------------------------------------                                 
+Si tuvieras una consulta o no reconoces la operación, llámanos al 311-6000       
+(Lima y provincias) o al 0-801-1-6000 (solo para teléfonos fijos de               
+provincia). 
+-----------------------------------
+formato 8
+Constancia de recepción de Yapeo a celular BCP - Servicio de Notificaciones BCP
+Inbox
+
+BCP Notificaciones <notificaciones@notificacionesbcp.com.pe>
+Mon, Aug 24, 9:03 PM (7 days ago)
+to me
+
+
+ 
+Hola Elvis Andair,
+
+Recibiste un yapeo de S/ 500.00 de Sullon Ramos Alison Yane.
+
+Por tu seguridad te enviamos los datos de tu yapeo.
+
+ 
+Monto
+
+ 
+Monto recibido	S/ 500.00
+ 
+Datos de la operación
+
+ 
+Operación realizada	Yapeo a celular
+Fecha y hora	24 de agosto de 2026 - 09:03 PM
+Enviado por	Sullon Ramos Alison Yane
+ 
+	 	
+¿No reconoces esta operación?
+
+Comunícate inmediatamente con nosotros al
+
+(01)​ 311​-9898 anexo *911 para ayudarte a verificarla.
+
+ 
+¡Seguimos transformando tus planes en realidad!
+
+ 
+
+ 
+	 	
+Juntos somos más seguros
+El BCP nunca te solicitará datos confidenciales por correo, tales como tu clave secreta de cajero de 4 dígitos, clave de internet de 6 dígitos, número de tu tarjeta de débito o crédito, fecha de vencimiento, código CVV, código de validación OTP o clave Token, para resolver supuestos problemas con tus cuentas o para participar en sorteos o promociones.
+
+ 
+Nuestros correos personalizados con botón o link, únicamente te dirigirán a www​.viabcp​.com o sus páginas internas, es decir, que contengan .viabcp​.com en la dirección web. En caso tengas dudas sobre alguna comunicación del BCP puedes comunicarte con nosotros a través de nuestras redes sociales, al grupo de Facebook Alerta Fraude o llamando al (01)​ 311​-9898.
+
+Nuestros e-mails no incluirán archivos adjuntos (a excepción del envío de los estados de cuenta u otros documentos solicitados y/o coordinados previamente con nosotros).
+
+Para conocer más sobre las principales modalidades de fraude, aprender a reconocerlas y cómo protegerte, ingresa a https​://www​.viabcp​.com/seguridad y mantente atento a las publicaciones periódicas que realizamos en nuestras redes sociales.
+
+ 
+Si deseas desafiliarte del Servicio de Notificaciones BCP, puedes hacerlo desde nuestra app Banca Móvil BCP. Ingresa a la opción Configuración y ajusta tus preferencias de “Notificaciones por correo” para activar o desactivar el servicio cuando lo necesites. Recuerda que al desactivar esta opción dejarás de recibir información importante sobre el control y seguridad de tus Tarjetas BCP. Si deseas volver a recibir las notificaciones, podrás hacerlo desde nuestra misma app. Si este correo omite vocales, tildes, letras “ñ” o éstas son cambiadas por otros caracteres, no se debe a errores ortográficos del Banco de Crédito BCP. El sistema de correo electrónico del BCP está destinado únicamente para fines de negocio, cualquier otro uso contraviene las políticas del Banco. Toda la información del negocio contenida en este mensaje es confidencial y de uso exclusivo del BCP. Su divulgación, copia y/o adulteración están prohibidas y solo debe ser conocida por la persona a quien se dirige este mensaje. Esta información se envía de acuerdo a la legislación correo electrónico comercial no solicitado - SPAM según Leyes 28493 y 29246. Banco de Crédito del Perú S.A. - RUC: 20100​047218.
+
+ 
+----------------------------------
+formato 10
+Realizaste un consumo con tu Tarjeta de Débito BCP - Servicio de Notificaciones BCP
+Inbox
+
+BCP Notificaciones <notificaciones@notificacionesbcp.com.pe>
+Sun, Aug 23, 2:31 PM (8 days ago)
+to me
+
+
+ 
+Hola Elvis Andair,
+
+Realizaste un consumo de S/ 11.90 con tu Tarjeta de Débito BCP en Culqi QR MM.
+
+Por tu seguridad, te enviamos los datos de tu operación.
+
+ 
+Monto
+
+ 
+Total del consumo	S/ 11.90
+ 
+Datos de la operación
+
+ 
+Operación realizada	Consumo Tarjeta de Débito
+Fecha y hora	23 de agosto de 2026 - 02:31 PM
+Número de Tarjeta de Débito	************7559
+Empresa	Culqi QR MM
+Número de operación	108442
+
+ 
+	 	
+¿No reconoces esta operación?
+
+Comunícate inmediatamente con nosotros al
+
+(01)​ 311​-9898 anexo *911 para ayudarte a verificarla.
+
+ 
+¡Seguimos mejorando para ti!
+
+ 
+
+
+ 
+	 	
+Juntos somos más seguros
+
+El BCP nunca te solicitará datos confidenciales por correo, tales como tu clave secreta de cajero de 4 dígitos, clave de internet de 6 dígitos, número de tu tarjeta de débito o crédito, fecha de vencimiento, código CVV, código de validación OTP o clave Token, para resolver supuestos problemas con tus cuentas o para participar en sorteos o promociones.
+
+ 
+Nuestros correos personalizados con botón o link, únicamente te dirigirán a www​.viabcp​.com o sus páginas internas, es decir, que contengan .viabcp​.com en la dirección web. En caso tengas dudas sobre alguna comunicación del BCP puedes comunicarte con nosotros a través de nuestras redes sociales, al grupo de Facebook Alerta Fraude o llamando al (01)​ 311​-9898.
+
+Nuestros e-mails no incluirán archivos adjuntos (a excepción del envío de los estados de cuenta u otros documentos solicitados y/o coordinados previamente con nosotros).
+
+Para conocer más sobre las principales modalidades de fraude, aprender a reconocerlas y cómo protegerte, ingresa a https​://www​.viabcp​.com/seguridad y mantente atento a las publicaciones periódicas que realizamos en nuestras redes sociales.
+
+ 
+Si deseas desafiliarte del Servicio de Notificaciones BCP, puedes hacerlo desde nuestra app Banca Móvil BCP. Ingresa a la opción Configuración y ajusta tus preferencias de “Notificaciones por correo” para activar o desactivar el servicio cuando lo necesites. Recuerda que al desactivar esta opción dejarás de recibir información importante sobre el control y seguridad de tus Tarjetas BCP. Si deseas volver a recibir las notificaciones, podrás hacerlo desde nuestra misma app. Si este correo omite vocales, tildes, letras “ñ” o éstas son cambiadas por otros caracteres, no se debe a errores ortográficos del Banco de Crédito BCP. El sistema de correo electrónico del BCP está destinado únicamente para fines de negocio, cualquier otro uso contraviene las políticas del Banco. Toda la información del negocio contenida en este mensaje es confidencial y de uso exclusivo del BCP. Su divulgación, copia y/o adulteración están prohibidas y solo debe ser conocida por la persona a quien se dirige este mensaje. Esta información se envía de acuerdo a la legislación correo electrónico comercial no solicitado - SPAM según Leyes 28493 y 29246. Banco de Crédito del Perú S.A. - RUC: 20100​047218.
+
+ 
+
+-------------------------------------
+formato 11
+Pago con QR
+Inbox
+
+Scotiabank <bancadigital@scotiabank.com.pe>
+Sat, Aug 22, 11:17 AM (9 days ago)
+to me
+
+It looks like this message is in English
+Hola Elvis,
+
+Esta es la constancia de tu operación:
+
+Logo Scotiabank
+
+22 ago., 11:17 am
+
+Pago con QR
+
+Pagaste con:
+
+Débito Mastercard
+
+**** **** **** 9733
+
+Monto:
+
+S/ 2.00
+
+Pagaste a:
+
+IZI*PARADA 700
+
+Muchas gracias.
+
+Nota: Mensaje automático, por favor no responder.
+
+---------------------------------------------------
+formato 12
+Realizaste un consumo con tu Tarjeta de Débito BCP - Servicio de Notificaciones BCP
+Inbox
+
+BCP Notificaciones <notificaciones@notificacionesbcp.com.pe>
+4:49 PM (0 minutes ago)
+to me
+
+
+ 
+Hola Elvis Andair,
+
+Realizaste un consumo de S/ 1.00 con tu Tarjeta de Débito BCP en PLIN-ELVIS ANDAIR ALCAN.
+
+Por tu seguridad, te enviamos los datos de tu operación.
+
+ 
+Monto
+
+ 
+Total del consumo	S/ 1.00
+ 
+Datos de la operación
+
+ 
+Operación realizada	Consumo Tarjeta de Débito
+Fecha y hora	31 de agosto de 2026 - 04:49 PM
+Número de Tarjeta de Débito	************7559
+Empresa	PLIN-ELVIS ANDAIR ALCAN
+Número de operación	168026
+
+ 
+	 	
+¿No reconoces esta operación?
+
+Comunícate inmediatamente con nosotros al
+
+(01)​ 311​-9898 anexo *911 para ayudarte a verificarla.
+
+ 
+¡Seguimos mejorando para ti!
+
+ 
+
+
+ 
+	 	
+Juntos somos más seguros
+
+El BCP nunca te solicitará datos confidenciales por correo, tales como tu clave secreta de cajero de 4 dígitos, clave de internet de 6 dígitos, número de tu tarjeta de débito o crédito, fecha de vencimiento, código CVV, código de validación OTP o clave Token, para resolver supuestos problemas con tus cuentas o para participar en sorteos o promociones.
+
+ 
+Nuestros correos personalizados con botón o link, únicamente te dirigirán a www​.viabcp​.com o sus páginas internas, es decir, que contengan .viabcp​.com en la dirección web. En caso tengas dudas sobre alguna comunicación del BCP puedes comunicarte con nosotros a través de nuestras redes sociales, al grupo de Facebook Alerta Fraude o llamando al (01)​ 311​-9898.
+
+Nuestros e-mails no incluirán archivos adjuntos (a excepción del envío de los estados de cuenta u otros documentos solicitados y/o coordinados previamente con nosotros).
+
+Para conocer más sobre las principales modalidades de fraude, aprender a reconocerlas y cómo protegerte, ingresa a https​://www​.viabcp​.com/seguridad y mantente atento a las publicaciones periódicas que realizamos en nuestras redes sociales.
+
+ 
+Si deseas desafiliarte del Servicio de Notificaciones BCP, puedes hacerlo desde nuestra app Banca Móvil BCP. Ingresa a la opción Configuración y ajusta tus preferencias de “Notificaciones por correo” para activar o desactivar el servicio cuando lo necesites. Recuerda que al desactivar esta opción dejarás de recibir información importante sobre el control y seguridad de tus Tarjetas BCP. Si deseas volver a recibir las notificaciones, podrás hacerlo desde nuestra misma app. Si este correo omite vocales, tildes, letras “ñ” o éstas son cambiadas por otros caracteres, no se debe a errores ortográficos del Banco de Crédito BCP. El sistema de correo electrónico del BCP está destinado únicamente para fines de negocio, cualquier otro uso contraviene las políticas del Banco. Toda la información del negocio contenida en este mensaje es confidencial y de uso exclusivo del BCP. Su divulgación, copia y/o adulteración están prohibidas y solo debe ser conocida por la persona a quien se dirige este mensaje. Esta información se envía de acuerdo a la legislación correo electrónico comercial no solicitado - SPAM según Leyes 28493 y 29246. Banco de Crédito del Perú S.A. - RUC: 20100​047218.
+
+ -----------------------------
+ ultimo formato
+ Por tu seguridad, te notificaremos por cada yapeo que realices
+Inbox
+
+YAPE Notificaciones <notificaciones@yape.pe> Unsubscribe
+Tue, Jul 2, 2024, 1:38 PM
+to me
+
+Logo Yape
+¡Hola, ELVIS ANDAIR ALCANTARA M.!
+Yapeaste S/ 11.00 a
+RAMIROS RESTAURANT E.
+¿Demasiados correos? 
+Configura estas notificaciones
+Monto de Yapeo	S/ 11.00
+Tu número de celular	XXXXXXXXX148
+Fecha y Hora de la operación	02 julio 2024 - 01:38 p. m.
+Celular del Beneficiario	XXXXXXXXX229
+Nombre del Beneficiario	RAMIROS RESTAURANT E.
+N° de operación	7928304
+*Por tu seguridad, te notificaremos por cada
+yapeo que realices.
+
+Resuelve tus dudas en: Computer 
+yape	.	com	.	pe
+Si necesitas contactarnos, escríbenos:
+
+Whatsapp LogoA nuestro
+Whatsapp oficial
+939​ 339 ​299
+
+ imagen de alertaDesde tu
+App Yape
+Presiona el signo
+de interrogación
+
+Por estos canales podrás hacer tus consultas con nuestro asesor virtual o con un asesor especializado.
+
+Recuerda que no debes compartir tu clave secreta con nadie.
+
+	Juntos somos más seguros
+- El BCP nunca te solicitará datos confidenciales por correo, tales como tu clave secreta de cajero de 4 dígitos, clave de internet de 6 dígitos, número de tu tarjeta de débito o crédito, fecha de vencimiento, código CVV, código de validación OTP o clave Token, para resolver supuestos problemas con tus cuentas o para participar en sorteos o promociones.
+- Nuestros correos personalizados con botón o link, únicamente te dirigirán a www.viabcp. com o sus páginas internas, es decir, que contengan .viabcp. com en la dirección web. En caso tengas dudas sobre alguna comunicación del BCP puedes comunicarte con nosotros a través de nuestras redes sociales, al grupo de Facebook Alerta Fraude o llamando al (01) 311 - 9898.
+- Nuestros e-mails no incluirán archivos adjuntos (a excepción del envío de los estados de cuenta u otros documentos solicitados y/o coordinados previamente con nosotros).
+- Para conocer más sobre las principales modalidades de fraude, aprender a reconocerlas y cómo protegerte, ingresa a www.viabcp. com/seguridad y mantente atento a las publicaciones periódicas que realizamos en nuestras redes sociales.
+Si no deseas recibir estas comunicaciones en tu correo o has recibido este mensaje por error, puedes hacerlo desde aquí. Recuerda que no te pediremos ningún dato adicional para este proceso. Si tuvieras alguna consulta, por favor comunícate con nuestra Banca por Teléfono al 311-9898, no lo envíes a través de este correo electrónico. Si este correo omite vocales, tildes, letras ñ o éstas son cambiadas por otros caracteres, no se debe a errores ortográficos del Banco de Crédito BCP. Esto puede originarse por la configuración del servidor de tu correo o la versión de tu navegador. El sistema de correo electrónico del BCP está destinado únicamente para fines de negocio, cualquier otro uso contraviene las políticas del Banco. Toda la información del negocio contenida en este mensaje es confidencial y de uso exclusivo del BCP. Su divulgación, copia y/o adulteración están prohibidas y solo debe ser conocida por la persona a quien se dirige este mensaje. Esta información se envía de acuerdo a la legislación correo electrónico comercial no solicitado – SPAM según Leyes 28493 y 29246. Banco de Crédito del Perú S.A. – RUC: 20100047218.
+
+

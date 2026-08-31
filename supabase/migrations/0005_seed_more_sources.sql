@@ -1,7 +1,7 @@
--- El usuario solo usa Gmail (nunca configuró Outlook/MS Graph): notificaciones
--- de BCP también llegan a Gmail, así que se corrige la fuente existente.
-update sources set platform = 'gmail' where key = 'bcp-tarjeta';
-
+-- Fuentes de correo adicionales (defaults). El buzón (gmail/outlook) de cada
+-- fuente es una preferencia PERSONAL de cada usuario: se ajusta desde la
+-- pestaña "Fuentes" en la web, no con un UPDATE global aquí (eso pisaría la
+-- configuración de otros usuarios que reciben el mismo banco en otro buzón).
 insert into sources (key, name, platform, from_address, body_match, direction, parser_key) values
   ('io-servicio',      'iO servicio',              'gmail', 'notificaciones@io.pe',                      'El pago de tu servicio se realizó', 'egreso',  'io'),
   ('bcp-servicio',     'BCP pago de servicio',     'gmail', 'notificaciones@notificacionesbcp.com.pe',   'Pago de servicios',                 'egreso',  'bcp'),

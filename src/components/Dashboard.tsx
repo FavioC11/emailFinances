@@ -10,10 +10,12 @@ import Filters, { type TxFilter } from "@/components/Filters";
 import ManualEntryForm from "@/components/ManualEntryForm";
 import AskAI from "@/components/AskAI";
 import CategoryManager from "@/components/CategoryManager";
+import SourcesManager from "@/components/SourcesManager";
+import ExclusionsManager from "@/components/ExclusionsManager";
 
 const EMPTY_FILTER: TxFilter = { from: "", to: "", category: "" };
 
-type Tab = "dashboard" | "categorias";
+type Tab = "dashboard" | "categorias" | "fuentes" | "exclusiones";
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("dashboard");
@@ -118,6 +120,8 @@ export default function Dashboard() {
         {([
           { key: "dashboard", label: "Dashboard" },
           { key: "categorias", label: "Categorías" },
+          { key: "fuentes", label: "Fuentes" },
+          { key: "exclusiones", label: "Exclusiones" },
         ] as const).map((t) => (
           <button
             key={t.key}
@@ -142,6 +146,10 @@ export default function Dashboard() {
 
       {tab === "categorias" ? (
         <CategoryManager onChanged={refresh} />
+      ) : tab === "fuentes" ? (
+        <SourcesManager />
+      ) : tab === "exclusiones" ? (
+        <ExclusionsManager />
       ) : loading ? (
         <p className="text-sm text-[var(--muted)]">Cargando…</p>
       ) : (

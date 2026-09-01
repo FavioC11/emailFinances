@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import { groupCategories, type CategoryOption } from "@/lib/categories";
+import type { Tipo } from "@/lib/types";
+
+// La dirección (flujo de plata) se deriva del tipo elegido.
+const DIRECTION_OF: Record<Tipo, "ingreso" | "egreso"> = {
+  gasto: "egreso",
+  ingreso: "ingreso",
+  transferencia: "egreso", // caso común: pago a tu propia tarjeta
+  reembolso: "ingreso", // te devuelven plata
+};
 
 export default function ManualEntryForm({
   categories,
@@ -11,7 +20,8 @@ export default function ManualEntryForm({
   onSaved: () => void;
 }) {
   const grouped = groupCategories(categories);
-  const [direction, setDirection] = useState<"ingreso" | "egreso">("egreso");
+  const [tipo, setTipo] = useState<Tipo>("gasto");
+  const [currency, setCurrency] = useState<"PEN" | "USD">("PEN");
   const [amount, setAmount] = useState("");
   const [occurredAt, setOccurredAt] = useState("");
   const [counterparty, setCounterparty] = useState("");
@@ -28,7 +38,9 @@ export default function ManualEntryForm({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          direction,
+          direction: DIRECTION_OF[tipo],
+          tipo,
+          currency,
           amount: Number(amount),
           occurred_at: occurredAt ? new Date(occurredAt).toISOString() : undefined,
           counterparty: counterparty || undefined,
@@ -60,16 +72,29 @@ export default function ManualEntryForm({
         <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
           Tipo
           <select
-            value={direction}
-            onChange={(e) => setDirection(e.target.value as "ingreso" | "egreso")}
+            value={tipo}
+            onChange={(e) => setTipo(e.target.value as Tipo)}
             className={inputCls}
           >
-            <option value="egreso">Egreso</option>
+            <option value="gasto">Gasto</option>
             <option value="ingreso">Ingreso</option>
+            <option value="transferencia">Transferencia (no suma)</option>
+            <option value="reembolso">Reembolso (netea un gasto)</option>
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
-          Monto (S/)
+          Moneda
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as "PEN" | "USD")}
+            className={inputCls}
+          >
+            <option value="PEN">Soles (S/)</option>
+            <option value="USD">Dólares (US$)</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-[var(--muted)]">
+          Monto ({currency === "USD" ? "US$" : "S/"})
           <input
             type="number"
             step="0.01"

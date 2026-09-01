@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import type { Transaction } from "@/lib/types";
 import type { CategoryOption } from "@/lib/categories";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, limaDayKey } from "@/lib/format";
 
 const INGRESO = "#2a78d6";
 const EGRESO = "#e34948";
@@ -24,10 +24,6 @@ const EGRESO = "#e34948";
 // (índice estable de la categoría), nunca a su ranking por monto.
 const CAT_COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"];
 const UNCATEGORIZED_COLOR = "#898781";
-
-function dayKey(iso: string): string {
-  return iso.slice(0, 10);
-}
 
 export default function Charts({
   transactions,
@@ -37,12 +33,22 @@ export default function Charts({
   categories: CategoryOption[];
 }) {
   const categoryNames = categories.map((c) => c.name);
+  // Los gráficos se calculan solo con movimientos en soles: mezclar S/ y US$ en
+  // una misma línea o pie no tiene sentido (sumar monedas distintas). Los
+  // dólares siguen visibles en las tarjetas de balance y en la tabla.
+  const penTx = useMemo(
+    () => transactions.filter((t) => (t.currency || "PEN") === "PEN"),
+    [transactions]
+  );
   const daily = useMemo(() => {
     const map = new Map<string, { ingresos: number; egresos: number }>();
-    for (const t of transactions) {
-      const key = dayKey(t.occurred_at);
+    for (const t of penTx) {
+      // Solo gasto/ingreso reales: las transferencias y reembolsos no son
+      // gasto ni ingreso, así que no entran a la tendencia diaria.
+      if (t.tipo !== "gasto" && t.tipo !== "ingreso") continue;
+      const key = limaDayKey(t.occurred_at);
       const entry = map.get(key) ?? { ingresos: 0, egresos: 0 };
-      if (t.direction === "ingreso") entry.ingresos += Number(t.amount);
+      if (t.tipo === "ingreso") entry.ingresos += Number(t.amount);
       else entry.egresos += Number(t.amount);
       map.set(key, entry);
     }
@@ -54,12 +60,12 @@ export default function Charts({
         ingresos: Number(v.ingresos.toFixed(2)),
         egresos: Number(v.egresos.toFixed(2)),
       }));
-  }, [transactions]);
+  }, [penTx]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
-    for (const t of transactions) {
-      if (t.direction !== "egreso") continue;
+    for (const t of penTx) {
+      if (t.tipo !== "gasto") continue; // solo gasto real por categoría
       const cat = t.category ?? "Sin categoría";
       map.set(cat, (map.get(cat) ?? 0) + Number(t.amount));
     }
@@ -67,7 +73,7 @@ export default function Charts({
       name,
       value: Number(value.toFixed(2)),
     }));
-  }, [transactions]);
+  }, [penTx]);
 
   const colorFor = (name: string) => {
     if (name === "Sin categoría") return UNCATEGORIZED_COLOR;

@@ -8,8 +8,27 @@ import { parseInterbankTarjeta } from "@/lib/parsers/interbank-tarjeta";
 import { parseIoServicio } from "@/lib/parsers/io";
 import { parseBbvaServicio } from "@/lib/parsers/bbva";
 import { parseScotiabankPlin, parseScotiabankQR } from "@/lib/parsers/scotiabank";
-import type { Parser } from "@/lib/parsers/types";
+import type { Parser, ParsedTransaction } from "@/lib/parsers/types";
 import { categorize, type CategoryRule } from "@/lib/categorize";
+import { limaDayKey } from "@/lib/format";
+
+// Clave de dedup estable para correos SIN número de operación. Junta el día
+// (hora Lima), el monto y la contraparte normalizada — lo bastante específico
+// para no colapsar compras distintas, y lo bastante estable para que el
+// doble-correo de una misma compra caiga en la misma fila.
+function stableDedupKey(parsed: ParsedTransaction, email: IncomingEmail): string {
+  const iso = parsed.occurred_at ?? email.receivedAt;
+  const day = limaDayKey(iso);
+  const cp = (parsed.counterparty ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+  return `auto:${day}:${parsed.amount}:${parsed.currency}:${cp}`;
+}
+
+// tipo por default a partir de la dirección (migración segura, ver 0009):
+// egreso→gasto, ingreso→ingreso. El usuario reclasifica a transferencia o
+// reembolso desde la UI cuando corresponda.
+function defaultTipo(direction: "ingreso" | "egreso"): string {
+  return direction === "ingreso" ? "ingreso" : "gasto";
+}
 
 const parsers: Record<string, Parser> = {
   yape: parseYape,
@@ -35,6 +54,9 @@ export interface IngestResult {
   ok: true;
   inserted: number;
   skipped: number;
+  // Correos que el parser no supo leer (monto nulo, formato/moneda nuevos).
+  // No se descartan: van a la tabla `unrecognized` para revisarlos a mano.
+  unrecognized: number;
   sources: Record<string, { fetched: number; inserted: number; error?: string }>;
 }
 
@@ -71,6 +93,7 @@ export async function runIngest(): Promise<IngestResult> {
 
   let inserted = 0;
   let skipped = 0;
+  let unrecognized = 0;
   const perSource: IngestResult["sources"] = {};
   const typedSources = (sources ?? []) as Source[];
   for (const s of typedSources) perSource[s.key] = { fetched: 0, inserted: 0 };
@@ -122,12 +145,38 @@ export async function runIngest(): Promise<IngestResult> {
           const parser = parsers[s.parser_key];
           if (!parser) continue;
           const parsed = parser(e.text);
-          // Algunos bancos no incluyen número de operación (p.ej. consumos
-          // con tarjeta física) — se usa el id del correo como respaldo
-          // para el dedup en vez de perder la transacción.
-          const operation_no = parsed.operation_no ?? e.id;
-          if (!parsed.amount || isExcludedCounterparty(parsed.counterparty)) {
+          // Dedup. Si el correo trae número de operación, es la clave natural.
+          // Si NO lo trae (p.ej. consumos con tarjeta física), antes se usaba el
+          // id del correo — pero si el banco manda DOS correos por una compra,
+          // salían dos gastos (bug #3). Ahora se construye una clave ESTABLE a
+          // partir de monto + contraparte + día (hora Lima): dos correos de la
+          // misma compra colapsan en una sola fila.
+          const operation_no = parsed.operation_no ?? stableDedupKey(parsed, e);
+
+          // Exclusión intencional del usuario (p.ej. un gateway que solo mueve
+          // la tarjeta): se descarta a propósito y no va a "no reconocidos".
+          if (isExcludedCounterparty(parsed.counterparty)) {
             skipped++;
+            continue;
+          }
+
+          // El parser no supo leer el monto (formato nuevo, moneda distinta a
+          // S/, etc.). NUNCA se descarta en silencio: va a la bandeja de "no
+          // reconocidos" para revisarlo a mano. Dedup por (source_key, email_id).
+          if (!parsed.amount) {
+            const { error: unrecErr } = await db.from("unrecognized").upsert(
+              {
+                source_key: s.key,
+                email_id: e.id,
+                reason: "monto_nulo",
+                counterparty: parsed.counterparty,
+                snippet: e.text.slice(0, 600),
+                raw: parsed,
+              },
+              { onConflict: "source_key,email_id", ignoreDuplicates: true }
+            );
+            if (unrecErr) perSource[s.key].error = unrecErr.message;
+            else unrecognized++;
             continue;
           }
 
@@ -137,8 +186,10 @@ export async function runIngest(): Promise<IngestResult> {
               {
                 source_key: s.key,
                 direction: parsed.direction ?? s.direction,
+                tipo: defaultTipo(parsed.direction ?? s.direction),
                 amount: parsed.amount,
                 currency: parsed.currency,
+                amount_pen: parsed.amount_pen ?? null,
                 occurred_at: parsed.occurred_at ?? e.receivedAt,
                 counterparty: parsed.counterparty,
                 category: categorize(parsed.counterparty, rules),
@@ -170,5 +221,5 @@ export async function runIngest(): Promise<IngestResult> {
     }
   }
 
-  return { ok: true, inserted, skipped, sources: perSource };
+  return { ok: true, inserted, skipped, unrecognized, sources: perSource };
 }

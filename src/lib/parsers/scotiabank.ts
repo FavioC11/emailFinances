@@ -1,4 +1,5 @@
 import { parseSlashDate } from "@/lib/dates";
+import { matchMoney } from "./money";
 import type { ParsedTransaction } from "./types";
 
 // Scotiabank envía "Transferencia Plin" (enviada) y "Recepción Transferencia
@@ -10,9 +11,9 @@ export function parseScotiabankPlin(text: string): ParsedTransaction {
   // El asunto dice "Recepción Transferencia Plin", pero el parser solo ve el
   // cuerpo del correo — ahí la pista es "recibido", no "Recepción".
   const isRecepcion = /recibido/i.test(text);
-  const amount = isRecepcion
-    ? text.match(/Monto recibido\s*:?\s*S\/\s*([\d,]+\.\d{2})/i)?.[1]
-    : text.match(/Monto enviado\s*:?\s*S\/\s*([\d,]+\.\d{2})/i)?.[1];
+  const money = isRecepcion
+    ? matchMoney(text, ["Monto recibido"])
+    : matchMoney(text, ["Monto enviado"]);
   const counterparty = isRecepcion
     ? null
     : text.match(/Enviado a\s*:?\s*(.+)/i)?.[1]?.trim() ?? null;
@@ -22,25 +23,25 @@ export function parseScotiabankPlin(text: string): ParsedTransaction {
     /Fecha y hora\s*:?\s*(\d{1,2}\/\d{1,2}\/\d{4}[^\n]*)/i
   )?.[1];
   return {
-    amount: amount ? Number(amount.replace(/,/g, "")) : null,
+    amount: money?.amount ?? null,
     counterparty,
     operation_no,
     occurred_at: rawDate ? parseSlashDate(rawDate) : null,
     direction: isRecepcion ? "ingreso" : "egreso",
-    currency: "PEN",
+    currency: money?.currency ?? "PEN",
   };
 }
 
 // Pago con QR — tampoco trae número de operación ni año en la fecha corta.
 export function parseScotiabankQR(text: string): ParsedTransaction {
-  const amount = text.match(/Monto\s*:?\s*S\/\s*([\d,]+\.\d{2})/i)?.[1];
+  const money = matchMoney(text, ["Monto"]);
   const counterparty = text.match(/Pagaste a\s*:?\s*(.+)/i)?.[1]?.trim() ?? null;
   return {
-    amount: amount ? Number(amount.replace(/,/g, "")) : null,
+    amount: money?.amount ?? null,
     counterparty,
     operation_no: null,
     occurred_at: null,
     direction: "egreso",
-    currency: "PEN",
+    currency: money?.currency ?? "PEN",
   };
 }

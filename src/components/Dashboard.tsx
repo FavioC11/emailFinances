@@ -12,10 +12,12 @@ import AskAI from "@/components/AskAI";
 import CategoryManager from "@/components/CategoryManager";
 import SourcesManager from "@/components/SourcesManager";
 import ExclusionsManager from "@/components/ExclusionsManager";
+import DuplicatesPanel from "@/components/DuplicatesPanel";
+import { limaDayKey } from "@/lib/format";
 
 const EMPTY_FILTER: TxFilter = { from: "", to: "", category: "" };
 
-type Tab = "dashboard" | "categorias" | "fuentes" | "exclusiones";
+type Tab = "dashboard" | "duplicados" | "categorias" | "fuentes" | "exclusiones";
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("dashboard");
@@ -33,7 +35,7 @@ export default function Dashboard() {
   const filtered = useMemo(
     () =>
       transactions.filter((t) => {
-        const day = t.occurred_at.slice(0, 10);
+        const day = limaDayKey(t.occurred_at);
         if (filter.from && day < filter.from) return false;
         if (filter.to && day > filter.to) return false;
         if (
@@ -75,6 +77,9 @@ export default function Dashboard() {
         .filter(Boolean);
       setSyncMsg(
         `Listo: ${data.inserted} nuevos, ${data.skipped} omitidos.` +
+          (data.unrecognized
+            ? ` 🔍 ${data.unrecognized} sin reconocer (revisar).`
+            : "") +
           (errs.length ? ` ⚠️ ${errs.join(" · ")}` : "")
       );
       await refresh();
@@ -119,6 +124,7 @@ export default function Dashboard() {
       <nav className="mb-8 flex gap-1 border-b border-[var(--grid)]">
         {([
           { key: "dashboard", label: "Dashboard" },
+          { key: "duplicados", label: "Duplicados" },
           { key: "categorias", label: "Categorías" },
           { key: "fuentes", label: "Fuentes" },
           { key: "exclusiones", label: "Exclusiones" },
@@ -144,7 +150,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      {tab === "categorias" ? (
+      {tab === "duplicados" ? (
+        <DuplicatesPanel onChanged={refresh} />
+      ) : tab === "categorias" ? (
         <CategoryManager onChanged={refresh} />
       ) : tab === "fuentes" ? (
         <SourcesManager />

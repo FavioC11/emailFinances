@@ -31,3 +31,61 @@ export function parseInterbankPlin(text: string): ParsedTransaction {
     currency: "PEN",
   };
 }
+
+// "Constancia de pago" (sin "Plin") — pago inmediato hacia una tarjeta de
+// crédito Interbank desde una cuenta propia. Puede venir en soles o dólares.
+export function parseInterbankPagoTarjeta(text: string): ParsedTransaction {
+  const m = text.match(/Monto total\s*:?\s*(S\/\.?|US\$)\s*([\d,]+\.\d{2})/i);
+  const operation_no =
+    text.match(/C[óo]digo de operaci[óo]n\s*:?\s*(\d+)/i)?.[1] ?? null;
+  const rawDate = text.match(
+    /Fecha y hora\s*:?\s*(\d{1,2}\s+\w+\.?\s+\d{4}\s+\d{1,2}:\d{2}\s*[ap]\.?\s*m\.?)/i
+  )?.[1];
+  return {
+    amount: m ? Number(m[2].replace(/,/g, "")) : null,
+    counterparty: "Pago tarjeta de crédito Interbank",
+    operation_no,
+    occurred_at: rawDate ? parseSpanishDate(rawDate) : null,
+    direction: "egreso",
+    currency: m?.[1]?.toUpperCase().startsWith("US") ? "USD" : "PEN",
+  };
+}
+
+// "Constancia de transferencia" — transferencia a una cuenta de terceros o
+// propia. OJO: hay una plantilla vieja (transferencias a cuenta propia) que
+// usa "Cuenta destino" en vez de "Destinatario" y no tiene etiqueta "Fecha y
+// hora" (la fecha va pegada debajo del título). Sin el fallback de "Cuenta
+// destino", el regex terminaba enganchando la palabra "destinatario" del
+// disclaimer legal del pie del correo ("Si usted no es el destinatario...").
+export function parseInterbankTransferencia(text: string): ParsedTransaction {
+  const m = text.match(/Moneda y monto\s*:?\s*(S\/\.?|US\$)\s*([\d,]+\.\d{2})/i);
+  // El bloque "Destinatario"/"Cuenta destino" trae el nombre y, en la línea
+  // siguiente, el número de cuenta — se capturan ambos para poder excluir
+  // transferencias entre cuentas propias del usuario por número de cuenta.
+  const destBlock = text.match(
+    /(?:Destinatario|Cuenta destino)\s*:?\s*(.+?)\s*(?:Tipo de operaci[óo]n|Moneda y monto)/is
+  )?.[1];
+  const destLines = destBlock
+    ? destBlock.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+    : [];
+  const counterparty = destLines[0] ?? null;
+  const counterpartyAccount = destLines[1] ?? null;
+  const operation_no =
+    text.match(/C[óo]digo de operaci[óo]n\s*:?\s*(\d+)/i)?.[1] ?? null;
+  const rawDate =
+    text.match(
+      /Fecha y hora\s*:?\s*(\d{1,2}\s+\w+\.?\s+\d{4}\s+\d{1,2}:\d{2}\s*[ap]\.?\s*m\.?)/i
+    )?.[1] ??
+    text.match(
+      /Constancia de transferencia\s*(\d{1,2}\s+[a-záéíóúñ]+\.?\s+\d{4}\s+\d{1,2}:\d{2}\s*[ap]\.?\s*m\.?)/i
+    )?.[1];
+  return {
+    amount: m ? Number(m[2].replace(/,/g, "")) : null,
+    counterparty,
+    counterpartyAccount,
+    operation_no,
+    occurred_at: rawDate ? parseSpanishDate(rawDate) : null,
+    direction: "egreso",
+    currency: m?.[1]?.toUpperCase().startsWith("US") ? "USD" : "PEN",
+  };
+}

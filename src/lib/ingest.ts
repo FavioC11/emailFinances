@@ -3,10 +3,14 @@ import { fetchGmail, type IncomingEmail } from "@/lib/gmail";
 import { fetchGraph } from "@/lib/graph";
 import { parseYape } from "@/lib/parsers/yape";
 import { parseBcp } from "@/lib/parsers/bcp";
-import { parseInterbankPlin } from "@/lib/parsers/interbank";
+import {
+  parseInterbankPlin,
+  parseInterbankPagoTarjeta,
+  parseInterbankTransferencia,
+} from "@/lib/parsers/interbank";
 import { parseInterbankTarjeta } from "@/lib/parsers/interbank-tarjeta";
 import { parseIoServicio } from "@/lib/parsers/io";
-import { parseBbvaServicio } from "@/lib/parsers/bbva";
+import { parseBbvaServicio, parseBbvaRetiro } from "@/lib/parsers/bbva";
 import { parseScotiabankPlin, parseScotiabankQR } from "@/lib/parsers/scotiabank";
 import type { Parser } from "@/lib/parsers/types";
 import { categorize, type CategoryRule } from "@/lib/categorize";
@@ -15,9 +19,12 @@ const parsers: Record<string, Parser> = {
   yape: parseYape,
   bcp: parseBcp,
   interbank: parseInterbankPlin,
+  "interbank-pago-tarjeta": parseInterbankPagoTarjeta,
+  "interbank-transferencia": parseInterbankTransferencia,
   "interbank-tarjeta": parseInterbankTarjeta,
   io: parseIoServicio,
   bbva: parseBbvaServicio,
+  "bbva-retiro": parseBbvaRetiro,
   "scotiabank-plin": parseScotiabankPlin,
   "scotiabank-qr": parseScotiabankQR,
 };
@@ -38,13 +45,23 @@ export interface IngestResult {
   sources: Record<string, { fetched: number; inserted: number; error?: string }>;
 }
 
-// Pagos que no son gasto real: se pagan a un gateway (ZiPago) solo para
-// mantener movimiento en la tarjeta de crédito, y el dinero vuelve — no
-// deben registrarse como egreso.
-const EXCLUDED_COUNTERPARTY = [/zipago/i];
+// Pagos que no son gasto real: ZiPago (se paga solo para mantener movimiento
+// en la tarjeta de crédito y el dinero vuelve) y TUCAMBISTA (a pedido del
+// usuario) — no deben registrarse como egreso.
+const EXCLUDED_COUNTERPARTY = [/zipago/i, /tucambista/i];
 
 function isExcludedCounterparty(counterparty: string | null): boolean {
   return counterparty != null && EXCLUDED_COUNTERPARTY.some((p) => p.test(counterparty));
+}
+
+// Transferencias entre cuentas propias del usuario (mismo Interbank) — no son
+// gasto real, solo mueven dinero de una cuenta propia a otra.
+const OWN_ACCOUNTS = ["CUENTA_PROPIA_REDACTADA_1", "CUENTA_PROPIA_REDACTADA_2"];
+
+function isOwnAccountTransfer(counterpartyAccount: string | null | undefined): boolean {
+  if (!counterpartyAccount) return false;
+  const normalized = counterpartyAccount.replace(/\s+/g, "");
+  return OWN_ACCOUNTS.some((acc) => normalized.includes(acc));
 }
 
 // Lee correos nuevos de cada fuente activa, parsea, categoriza y hace upsert.
@@ -122,7 +139,11 @@ export async function runIngest(): Promise<IngestResult> {
           // con tarjeta física) — se usa el id del correo como respaldo
           // para el dedup en vez de perder la transacción.
           const operation_no = parsed.operation_no ?? e.id;
-          if (!parsed.amount || isExcludedCounterparty(parsed.counterparty)) {
+          if (
+            !parsed.amount ||
+            isExcludedCounterparty(parsed.counterparty) ||
+            isOwnAccountTransfer(parsed.counterpartyAccount)
+          ) {
             skipped++;
             continue;
           }

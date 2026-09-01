@@ -35,12 +35,18 @@ export function parseBcp(text: string): ParsedTransaction {
   const operation_no =
     text.match(/N[úu]mero de operaci[óo]n\s*:?\s*(\d+)/i)?.[1] ?? null;
   const rawDate = text.match(/Fecha y hora\s*:?\s*(.+)/i)?.[1];
+  // Pago de tarjeta de crédito propia: la plata solo se mueve de una cuenta
+  // propia a la tarjeta (salda la deuda que ya generó el consumo). NO es gasto
+  // nuevo — se marca "transferencia" para no contar dos veces el mismo dinero
+  // (el gasto real vive en el correo del consumo).
+  const tipo = /Pago de tarjeta propia/i.test(text) ? "transferencia" : null;
   return {
     amount: money?.amount ?? null,
     counterparty,
     operation_no,
     occurred_at: rawDate ? parseSpanishDate(rawDate) : null,
     direction: "egreso",
+    tipo,
     currency: money?.currency ?? "PEN",
     amount_pen,
   };

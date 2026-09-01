@@ -186,7 +186,9 @@ export async function runIngest(): Promise<IngestResult> {
               {
                 source_key: s.key,
                 direction: parsed.direction ?? s.direction,
-                tipo: defaultTipo(parsed.direction ?? s.direction),
+                // El parser puede clasificar explícitamente (p.ej. pago de
+                // tarjeta propia → transferencia); si no, se deriva de la dirección.
+                tipo: parsed.tipo ?? defaultTipo(parsed.direction ?? s.direction),
                 amount: parsed.amount,
                 currency: parsed.currency,
                 amount_pen: parsed.amount_pen ?? null,

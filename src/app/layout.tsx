@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GlobalLoadingOverlay from "@/components/GlobalLoadingOverlay";
 
 export const metadata: Metadata = {
   title: "Finanzas por Correo",
@@ -12,7 +13,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        <GlobalLoadingOverlay />
+        {children}
+      </body>
     </html>
   );
 }

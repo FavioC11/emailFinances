@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
   const { data: tx, error } = await sbAdmin()
     .from("transactions")
-    .select("direction,amount,currency,occurred_at,counterparty,category")
+    .select("direction,amount,currency,amount_pen,occurred_at,counterparty,category")
     .order("occurred_at", { ascending: false })
     .limit(500);
   if (error) {
@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
       model: "claude-sonnet-5",
       max_tokens: 1024,
       system:
-        "Eres un analista financiero personal. Responde en español, claro y directo, con cifras. La moneda es soles peruanos (S/).",
+        "Eres un analista financiero personal. Responde en español, claro y " +
+        "directo, con cifras. Cada transacción trae su propia moneda en el " +
+        "campo `currency` (PEN = soles S/, USD = dólares US$): NO mezcles " +
+        "monedas al sumar; reporta los totales por moneda por separado. Si un " +
+        "movimiento en dólares trae `amount_pen`, ese es su equivalente en soles.",
       messages: [
         {
           role: "user",

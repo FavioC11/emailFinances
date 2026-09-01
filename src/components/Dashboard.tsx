@@ -13,6 +13,7 @@ import CategoryManager from "@/components/CategoryManager";
 import SourcesManager from "@/components/SourcesManager";
 import ExclusionsManager from "@/components/ExclusionsManager";
 import DuplicatesPanel from "@/components/DuplicatesPanel";
+import ResetDataButton from "@/components/ResetDataButton";
 import { limaDayKey } from "@/lib/format";
 
 const EMPTY_FILTER: TxFilter = { from: "", to: "", category: "" };
@@ -106,13 +107,16 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <button
-            onClick={sync}
-            disabled={syncing}
-            className="rounded-lg bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface)] disabled:opacity-50"
-          >
-            {syncing ? "Actualizando…" : "Actualizar desde correo"}
-          </button>
+          <div className="flex items-center gap-2">
+            <ResetDataButton onDone={refresh} />
+            <button
+              onClick={sync}
+              disabled={syncing}
+              className="rounded-lg bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface)] disabled:opacity-50"
+            >
+              {syncing ? "Actualizando…" : "Actualizar desde correo"}
+            </button>
+          </div>
           {syncMsg && (
             <span className="max-w-xs text-right text-xs text-[var(--ink-2)]">
               {syncMsg}

@@ -10,10 +10,15 @@ import Filters, { type TxFilter } from "@/components/Filters";
 import ManualEntryForm from "@/components/ManualEntryForm";
 import AskAI from "@/components/AskAI";
 import CategoryManager from "@/components/CategoryManager";
+import SourcesManager from "@/components/SourcesManager";
+import ExclusionsManager from "@/components/ExclusionsManager";
+import DuplicatesPanel from "@/components/DuplicatesPanel";
+import ResetDataButton from "@/components/ResetDataButton";
+import { limaDayKey } from "@/lib/format";
 
 const EMPTY_FILTER: TxFilter = { from: "", to: "", category: "" };
 
-type Tab = "dashboard" | "categorias";
+type Tab = "dashboard" | "duplicados" | "categorias" | "fuentes" | "exclusiones";
 
 export default function Dashboard() {
   const [tab, setTab] = useState<Tab>("dashboard");
@@ -31,7 +36,7 @@ export default function Dashboard() {
   const filtered = useMemo(
     () =>
       transactions.filter((t) => {
-        const day = t.occurred_at.slice(0, 10);
+        const day = limaDayKey(t.occurred_at);
         if (filter.from && day < filter.from) return false;
         if (filter.to && day > filter.to) return false;
         if (
@@ -73,6 +78,9 @@ export default function Dashboard() {
         .filter(Boolean);
       setSyncMsg(
         `Listo: ${data.inserted} nuevos, ${data.skipped} omitidos.` +
+          (data.unrecognized
+            ? ` 🔍 ${data.unrecognized} sin reconocer (revisar).`
+            : "") +
           (errs.length ? ` ⚠️ ${errs.join(" · ")}` : "")
       );
       await refresh();
@@ -99,13 +107,16 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <button
-            onClick={sync}
-            disabled={syncing}
-            className="rounded-lg bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface)] disabled:opacity-50"
-          >
-            {syncing ? "Actualizando…" : "Actualizar desde correo"}
-          </button>
+          <div className="flex items-center gap-2">
+            <ResetDataButton onDone={refresh} />
+            <button
+              onClick={sync}
+              disabled={syncing}
+              className="rounded-lg bg-[var(--ink)] px-4 py-2 text-sm font-medium text-[var(--surface)] disabled:opacity-50"
+            >
+              {syncing ? "Actualizando…" : "Actualizar desde correo"}
+            </button>
+          </div>
           {syncMsg && (
             <span className="max-w-xs text-right text-xs text-[var(--ink-2)]">
               {syncMsg}
@@ -117,7 +128,10 @@ export default function Dashboard() {
       <nav className="mb-8 flex gap-1 border-b border-[var(--grid)]">
         {([
           { key: "dashboard", label: "Dashboard" },
+          { key: "duplicados", label: "Duplicados" },
           { key: "categorias", label: "Categorías" },
+          { key: "fuentes", label: "Fuentes" },
+          { key: "exclusiones", label: "Exclusiones" },
         ] as const).map((t) => (
           <button
             key={t.key}
@@ -140,8 +154,14 @@ export default function Dashboard() {
         </div>
       )}
 
-      {tab === "categorias" ? (
+      {tab === "duplicados" ? (
+        <DuplicatesPanel onChanged={refresh} />
+      ) : tab === "categorias" ? (
         <CategoryManager onChanged={refresh} />
+      ) : tab === "fuentes" ? (
+        <SourcesManager />
+      ) : tab === "exclusiones" ? (
+        <ExclusionsManager />
       ) : loading ? (
         <p className="text-sm text-[var(--muted)]">Cargando…</p>
       ) : (

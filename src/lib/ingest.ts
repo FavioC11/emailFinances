@@ -12,8 +12,27 @@ import { parseInterbankTarjeta } from "@/lib/parsers/interbank-tarjeta";
 import { parseIoServicio } from "@/lib/parsers/io";
 import { parseBbvaServicio, parseBbvaRetiro } from "@/lib/parsers/bbva";
 import { parseScotiabankPlin, parseScotiabankQR } from "@/lib/parsers/scotiabank";
-import type { Parser } from "@/lib/parsers/types";
+import type { Parser, ParsedTransaction } from "@/lib/parsers/types";
 import { categorize, type CategoryRule } from "@/lib/categorize";
+import { limaDayKey } from "@/lib/format";
+
+// Clave de dedup estable para correos SIN número de operación. Junta el día
+// (hora Lima), el monto y la contraparte normalizada — lo bastante específico
+// para no colapsar compras distintas, y lo bastante estable para que el
+// doble-correo de una misma compra caiga en la misma fila.
+function stableDedupKey(parsed: ParsedTransaction, email: IncomingEmail): string {
+  const iso = parsed.occurred_at ?? email.receivedAt;
+  const day = limaDayKey(iso);
+  const cp = (parsed.counterparty ?? "").toLowerCase().replace(/\s+/g, " ").trim();
+  return `auto:${day}:${parsed.amount}:${parsed.currency}:${cp}`;
+}
+
+// tipo por default a partir de la dirección (migración segura, ver 0009):
+// egreso→gasto, ingreso→ingreso. El usuario reclasifica a transferencia o
+// reembolso desde la UI cuando corresponda.
+function defaultTipo(direction: "ingreso" | "egreso"): string {
+  return direction === "ingreso" ? "ingreso" : "gasto";
+}
 
 const parsers: Record<string, Parser> = {
   yape: parseYape,
@@ -42,24 +61,26 @@ export interface IngestResult {
   ok: true;
   inserted: number;
   skipped: number;
+  // Correos que el parser no supo leer (monto nulo, formato/moneda nuevos).
+  // No se descartan: van a la tabla `unrecognized` para revisarlos a mano.
+  unrecognized: number;
   sources: Record<string, { fetched: number; inserted: number; error?: string }>;
 }
 
-// Pagos que no son gasto real: ZiPago (se paga solo para mantener movimiento
-// en la tarjeta de crédito y el dinero vuelve) y TUCAMBISTA (a pedido del
-// usuario) — no deben registrarse como egreso.
-const EXCLUDED_COUNTERPARTY = [/zipago/i, /tucambista/i];
-
-function isExcludedCounterparty(counterparty: string | null): boolean {
-  return counterparty != null && EXCLUDED_COUNTERPARTY.some((p) => p.test(counterparty));
-}
-
 // Transferencias entre cuentas propias del usuario (mismo Interbank) — no son
-// gasto real, solo mueven dinero de una cuenta propia a otra.
-const OWN_ACCOUNTS = ["CUENTA_PROPIA_REDACTADA_1", "CUENTA_PROPIA_REDACTADA_2"];
+// gasto real, solo mueven dinero de una cuenta propia a otra. A diferencia de
+// las exclusiones (tabla `exclusions`, se ocultan del todo), esto SÍ se
+// registra pero como tipo="transferencia" (no suma a los totales, ver 0009).
+// Los números van en .env.local (nunca en el código: son datos personales del
+// usuario, no un secreto de la app, pero tampoco algo para versionar en un
+// repo público) — coma-separados en OWN_ACCOUNT_NUMBERS.
+const OWN_ACCOUNTS = (process.env.OWN_ACCOUNT_NUMBERS ?? "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 function isOwnAccountTransfer(counterpartyAccount: string | null | undefined): boolean {
-  if (!counterpartyAccount) return false;
+  if (!counterpartyAccount || OWN_ACCOUNTS.length === 0) return false;
   const normalized = counterpartyAccount.replace(/\s+/g, "");
   return OWN_ACCOUNTS.some((acc) => normalized.includes(acc));
 }
@@ -82,8 +103,22 @@ export async function runIngest(): Promise<IngestResult> {
     .order("orden", { ascending: true });
   const rules: CategoryRule[] = (cats ?? []).filter((c) => c.name !== "Sin categoría");
 
+  // Exclusiones configurables (antes fijas en el código): si la contraparte
+  // contiene alguno de estos patrones, el movimiento no se registra.
+  const { data: exRows } = await db
+    .from("exclusions")
+    .select("pattern")
+    .eq("active", true);
+  const exclusions = (exRows ?? [])
+    .map((r) => String(r.pattern).trim().toLowerCase())
+    .filter(Boolean);
+  const isExcludedCounterparty = (counterparty: string | null): boolean =>
+    counterparty != null &&
+    exclusions.some((p) => counterparty.toLowerCase().includes(p));
+
   let inserted = 0;
   let skipped = 0;
+  let unrecognized = 0;
   const perSource: IngestResult["sources"] = {};
   const typedSources = (sources ?? []) as Source[];
   for (const s of typedSources) perSource[s.key] = { fetched: 0, inserted: 0 };
@@ -135,16 +170,43 @@ export async function runIngest(): Promise<IngestResult> {
           const parser = parsers[s.parser_key];
           if (!parser) continue;
           const parsed = parser(e.text);
-          // Algunos bancos no incluyen número de operación (p.ej. consumos
-          // con tarjeta física) — se usa el id del correo como respaldo
-          // para el dedup en vez de perder la transacción.
-          const operation_no = parsed.operation_no ?? e.id;
-          if (
-            !parsed.amount ||
-            isExcludedCounterparty(parsed.counterparty) ||
-            isOwnAccountTransfer(parsed.counterpartyAccount)
-          ) {
+          // Dedup. Si el correo trae número de operación, es la clave natural.
+          // Si NO lo trae (p.ej. consumos con tarjeta física), antes se usaba el
+          // id del correo — pero si el banco manda DOS correos por una compra,
+          // salían dos gastos (bug #3). Ahora se construye una clave ESTABLE a
+          // partir de monto + contraparte + día (hora Lima): dos correos de la
+          // misma compra colapsan en una sola fila.
+          const operation_no = parsed.operation_no ?? stableDedupKey(parsed, e);
+
+          // Exclusión intencional del usuario (p.ej. un gateway que solo mueve
+          // la tarjeta): se descarta a propósito y no va a "no reconocidos".
+          if (isExcludedCounterparty(parsed.counterparty)) {
             skipped++;
+            continue;
+          }
+
+          // Transferencia a una cuenta propia del usuario: se registra igual
+          // (se ve en la tabla) pero forzada a tipo="transferencia", para que
+          // no sume a los totales de gasto sin ocultar el movimiento.
+          const ownTransfer = isOwnAccountTransfer(parsed.counterpartyAccount);
+
+          // El parser no supo leer el monto (formato nuevo, moneda distinta a
+          // S/, etc.). NUNCA se descarta en silencio: va a la bandeja de "no
+          // reconocidos" para revisarlo a mano. Dedup por (source_key, email_id).
+          if (!parsed.amount) {
+            const { error: unrecErr } = await db.from("unrecognized").upsert(
+              {
+                source_key: s.key,
+                email_id: e.id,
+                reason: "monto_nulo",
+                counterparty: parsed.counterparty,
+                snippet: e.text.slice(0, 600),
+                raw: parsed,
+              },
+              { onConflict: "source_key,email_id", ignoreDuplicates: true }
+            );
+            if (unrecErr) perSource[s.key].error = unrecErr.message;
+            else unrecognized++;
             continue;
           }
 
@@ -154,8 +216,16 @@ export async function runIngest(): Promise<IngestResult> {
               {
                 source_key: s.key,
                 direction: parsed.direction ?? s.direction,
+                // El parser puede clasificar explícitamente (p.ej. pago de
+                // tarjeta propia → transferencia); si no, se deriva de la
+                // dirección. Una transferencia a cuenta propia manda sobre
+                // ambas: siempre es "transferencia", nunca gasto.
+                tipo: ownTransfer
+                  ? "transferencia"
+                  : parsed.tipo ?? defaultTipo(parsed.direction ?? s.direction),
                 amount: parsed.amount,
                 currency: parsed.currency,
+                amount_pen: parsed.amount_pen ?? null,
                 occurred_at: parsed.occurred_at ?? e.receivedAt,
                 counterparty: parsed.counterparty,
                 category: categorize(parsed.counterparty, rules),
@@ -187,5 +257,5 @@ export async function runIngest(): Promise<IngestResult> {
     }
   }
 
-  return { ok: true, inserted, skipped, sources: perSource };
+  return { ok: true, inserted, skipped, unrecognized, sources: perSource };
 }

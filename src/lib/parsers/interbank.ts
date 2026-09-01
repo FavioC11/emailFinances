@@ -1,4 +1,5 @@
 import { parseSpanishDate } from "@/lib/dates";
+import { matchMoney } from "./money";
 import type { ParsedTransaction } from "./types";
 
 // Interbank envía "Constancia de Pago Plin" cuando el usuario paga con Plin
@@ -8,9 +9,7 @@ import type { ParsedTransaction } from "./types";
 // invertido "Moneda y monto", y no tiene etiqueta "Fecha y hora" (la fecha va
 // pegada justo debajo del título "Constancia de Pago Plin").
 export function parseInterbankPlin(text: string): ParsedTransaction {
-  const amount = text.match(
-    /(?:Monto y moneda|Moneda y monto)\s*:?\s*S\/\s*([\d,]+\.\d{2})/i
-  )?.[1];
+  const money = matchMoney(text, ["Monto y moneda", "Moneda y monto"]);
   const counterparty =
     text.match(/Destinatario\s*:?\s*(.+?)\s*Destino\s*:?/is)?.[1]?.trim() ?? null;
   const operation_no =
@@ -23,12 +22,12 @@ export function parseInterbankPlin(text: string): ParsedTransaction {
       /(\d{1,2}\s+[a-záéíóúñ]+\.?\s+\d{4}\s+\d{1,2}:\d{2}\s*[ap]\.?\s*m\.?)/i
     )?.[1];
   return {
-    amount: amount ? Number(amount.replace(/,/g, "")) : null,
+    amount: money?.amount ?? null,
     counterparty,
     operation_no,
     occurred_at: rawDate ? parseSpanishDate(rawDate) : null,
     direction: "egreso",
-    currency: "PEN",
+    currency: money?.currency ?? "PEN",
   };
 }
 
@@ -47,6 +46,9 @@ export function parseInterbankPagoTarjeta(text: string): ParsedTransaction {
     operation_no,
     occurred_at: rawDate ? parseSpanishDate(rawDate) : null,
     direction: "egreso",
+    // La plata solo se mueve de una cuenta propia a la tarjeta (salda una
+    // deuda que ya generó el consumo real) — no es gasto nuevo, es transferencia.
+    tipo: "transferencia",
     currency: m?.[1]?.toUpperCase().startsWith("US") ? "USD" : "PEN",
   };
 }

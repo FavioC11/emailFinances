@@ -37,6 +37,7 @@ export default function TxTable({
 }) {
   const grouped = useMemo(() => groupCategories(categories), [categories]);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "fecha",
     dir: "desc",
@@ -57,6 +58,26 @@ export default function TxTable({
   };
   const updateCategory = (id: string, category: string) => patch(id, { category });
   const updateTipo = (id: string, tipo: Tipo) => patch(id, { tipo });
+
+  const deleteTx = async (id: string) => {
+    if (!confirm("¿Eliminar este gasto registrado manualmente?")) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch("/api/transactions", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        alert(error || "No se pudo eliminar el movimiento.");
+        return;
+      }
+      onChanged();
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // Valor comparable por columna. El monto se ordena con signo (ingreso +,
   // egreso −) para que coincida con lo que se ve en la tabla.
@@ -143,12 +164,13 @@ export default function TxTable({
                   </th>
                 );
               })}
+              <th className="py-2 text-right"></th>
             </tr>
           </thead>
           <tbody>
             {transactions.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-[var(--muted)]">
+                <td colSpan={7} className="py-8 text-center text-[var(--muted)]">
                   No hay movimientos con esos filtros.
                 </td>
               </tr>
@@ -203,7 +225,7 @@ export default function TxTable({
                   {t.origin === "manual" ? "Manual" : "Correo"}
                 </td>
                 <td
-                  className="whitespace-nowrap py-2 text-right font-medium tabular-nums"
+                  className="whitespace-nowrap py-2 pr-4 text-right font-medium tabular-nums"
                   style={{
                     color: TIPO_NEUTRO(t.tipo)
                       ? "var(--muted)"
@@ -214,6 +236,19 @@ export default function TxTable({
                 >
                   {t.direction === "ingreso" ? "+" : "−"}
                   {formatMoney(Number(t.amount), t.currency)}
+                </td>
+                <td className="whitespace-nowrap py-2 text-right">
+                  {t.origin === "manual" && (
+                    <button
+                      type="button"
+                      onClick={() => deleteTx(t.id)}
+                      disabled={deletingId === t.id}
+                      className="rounded-md border border-[var(--hairline)] px-2 py-1 text-xs text-[var(--egreso)] transition-colors hover:bg-[var(--egreso)]/10 disabled:opacity-50"
+                      title="Eliminar gasto manual"
+                    >
+                      {deletingId === t.id ? "Eliminando…" : "Eliminar"}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

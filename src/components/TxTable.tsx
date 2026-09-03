@@ -17,6 +17,7 @@ export default function TxTable({
   const [to, setTo] = useState("");
   const [category, setCategory] = useState("");
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -41,6 +42,26 @@ export default function TxTable({
       onChanged();
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const deleteTx = async (id: string) => {
+    if (!confirm("¿Eliminar este gasto registrado manualmente?")) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch("/api/transactions", {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: "" }));
+        alert(error || "No se pudo eliminar el movimiento.");
+        return;
+      }
+      onChanged();
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -82,13 +103,14 @@ export default function TxTable({
               <th className="py-2 pr-4">Detalle</th>
               <th className="py-2 pr-4">Categoría</th>
               <th className="py-2 pr-4">Origen</th>
-              <th className="py-2 text-right">Monto</th>
+              <th className="py-2 pr-4 text-right">Monto</th>
+              <th className="py-2 text-right"></th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="py-8 text-center text-[var(--muted)]">
+                <td colSpan={6} className="py-8 text-center text-[var(--muted)]">
                   No hay movimientos con esos filtros.
                 </td>
               </tr>
@@ -120,13 +142,26 @@ export default function TxTable({
                   {t.origin === "manual" ? "Manual" : "Correo"}
                 </td>
                 <td
-                  className="whitespace-nowrap py-2 text-right font-medium tabular-nums"
+                  className="whitespace-nowrap py-2 pr-4 text-right font-medium tabular-nums"
                   style={{
                     color: t.direction === "ingreso" ? "var(--good-text)" : "var(--ink)",
                   }}
                 >
                   {t.direction === "ingreso" ? "+" : "−"}
                   {formatMoney(Number(t.amount))}
+                </td>
+                <td className="whitespace-nowrap py-2 text-right">
+                  {t.origin === "manual" && (
+                    <button
+                      type="button"
+                      onClick={() => deleteTx(t.id)}
+                      disabled={deletingId === t.id}
+                      className="rounded-md border border-[var(--hairline)] px-2 py-1 text-xs text-[var(--egreso)] transition-colors hover:bg-[var(--egreso)]/10 disabled:opacity-50"
+                      title="Eliminar gasto manual"
+                    >
+                      {deletingId === t.id ? "Eliminando…" : "Eliminar"}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

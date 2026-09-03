@@ -91,3 +91,28 @@ export async function PATCH(req: NextRequest) {
   }
   return NextResponse.json({ ok: true });
 }
+
+// DELETE /api/transactions — eliminar un gasto registrado manualmente
+export async function DELETE(req: NextRequest) {
+  const body = (await req.json()) as { id?: string };
+  if (!body.id) {
+    return NextResponse.json({ error: "id es obligatorio" }, { status: 400 });
+  }
+  // Solo se permiten borrar movimientos de origen manual; los que vienen del
+  // correo son la fuente de verdad y no deben eliminarse desde la UI.
+  const { error, count } = await sbAdmin()
+    .from("transactions")
+    .delete({ count: "exact" })
+    .eq("id", body.id)
+    .eq("origin", "manual");
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (!count) {
+    return NextResponse.json(
+      { error: "No se encontró un movimiento manual con ese id" },
+      { status: 404 }
+    );
+  }
+  return NextResponse.json({ ok: true });
+}

@@ -61,6 +61,17 @@
       "command": "pnpm poll",
       "presentation": { "reveal": "always", "panel": "dedicated" },
       "problemMatcher": []
+    },
+    {
+      "label": "graphify: build graph if missing",
+      "type": "shell",
+      "command": "test -f graphify-out/graph.json || graphify extract . --code-only",
+      "windows": {
+        "command": "if (-not (Test-Path graphify-out/graph.json)) { graphify extract . --code-only }"
+      },
+      "runOptions": { "runOn": "folderOpen" },
+      "presentation": { "reveal": "silent", "panel": "shared" },
+      "problemMatcher": []
     }
   ]
 }

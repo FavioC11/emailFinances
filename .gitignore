@@ -36,3 +36,10 @@ yarn-error.log*
 # supabase local
 supabase/.temp
 supabase/.branches
+
+# muestras de correos reales para desarrollar parsers — contienen datos
+# personales, NUNCA se versionan (menos en un repo público)
+formato_correos.txt
+
+# graphify — grafo de código local (no se versiona)
+/graphify-out/

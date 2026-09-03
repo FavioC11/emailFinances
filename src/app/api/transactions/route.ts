@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   let query = db
     .from("transactions")
     .select(
-      "id,source_key,direction,amount,currency,occurred_at,counterparty,category,operation_no,origin,created_at"
+      "id,source_key,direction,tipo,amount,currency,amount_pen,occurred_at,counterparty,category,operation_no,vinculado_a,origin,created_at"
     )
     .order("occurred_at", { ascending: false })
     .limit(1000);
@@ -22,20 +22,25 @@ export async function GET(req: NextRequest) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const category = searchParams.get("category");
-  if (from) query = query.gte("occurred_at", from);
-  if (to) query = query.lte("occurred_at", `${to}T23:59:59`);
+  // Límites anclados a America/Lima (UTC-05:00). Sin el offset, Postgres
+  // interpreta el "YYYY-MM-DD" como medianoche UTC y recorta los movimientos
+  // nocturnos hacia el día/mes equivocado.
+  if (from) query = query.gte("occurred_at", `${from}T00:00:00-05:00`);
+  if (to) query = query.lte("occurred_at", `${to}T23:59:59-05:00`);
   if (category) query = query.eq("category", category);
 
   const [{ data: transactions, error }, { data: categories }] = await Promise.all([
     query,
-    db.from("categories").select("name").order("name"),
+    // Ordenadas por `orden` (prioridad de match) y luego por nombre; el front
+    // las agrupa por `grupo` en los dropdowns.
+    db.from("categories").select("name,grupo").order("orden").order("name"),
   ]);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   return NextResponse.json({
     transactions: transactions ?? [],
-    categories: (categories ?? []).map((c) => c.name),
+    categories: categories ?? [],
   });
 }
 
@@ -43,7 +48,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
     direction?: "ingreso" | "egreso";
+    tipo?: string;
     amount?: number;
+    currency?: string;
     occurred_at?: string;
     counterparty?: string;
     category?: string;
@@ -54,14 +61,24 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+  // Solo se aceptan las monedas que la app maneja hoy.
+  const currency = body.currency === "USD" ? "USD" : "PEN";
+  // tipo válido; si no viene, se deriva de la dirección (egreso→gasto).
+  const TIPOS = ["gasto", "ingreso", "transferencia", "reembolso"];
+  const tipo = body.tipo && TIPOS.includes(body.tipo)
+    ? body.tipo
+    : body.direction === "ingreso"
+    ? "ingreso"
+    : "gasto";
 
   const { data, error } = await sbAdmin()
     .from("transactions")
     .insert({
       source_key: "manual",
       direction: body.direction,
+      tipo,
       amount: body.amount,
-      currency: "PEN",
+      currency,
       occurred_at: body.occurred_at ?? new Date().toISOString(),
       counterparty: body.counterparty ?? null,
       category: body.category ?? "Sin categoría",
@@ -76,15 +93,41 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, id: data.id });
 }
 
-// PATCH /api/transactions — editar categoría inline
+// PATCH /api/transactions — editar categoría, tipo o vínculo (reembolso→gasto)
 export async function PATCH(req: NextRequest) {
-  const body = (await req.json()) as { id?: string; category?: string };
-  if (!body.id || !body.category) {
-    return NextResponse.json({ error: "id y category son obligatorios" }, { status: 400 });
+  const body = (await req.json()) as {
+    id?: string;
+    category?: string;
+    tipo?: string;
+    // null desvincula; string ata el reembolso a un gasto.
+    vinculado_a?: string | null;
+  };
+  if (!body.id) {
+    return NextResponse.json({ error: "id es obligatorio" }, { status: 400 });
   }
+
+  const update: Record<string, unknown> = {};
+  if (body.category !== undefined) update.category = body.category;
+  if (body.tipo !== undefined) {
+    const TIPOS = ["gasto", "ingreso", "transferencia", "reembolso"];
+    if (!TIPOS.includes(body.tipo)) {
+      return NextResponse.json({ error: "tipo inválido" }, { status: 400 });
+    }
+    update.tipo = body.tipo;
+    // Si deja de ser reembolso, se limpia el vínculo para no dejar basura.
+    if (body.tipo !== "reembolso" && body.vinculado_a === undefined) {
+      update.vinculado_a = null;
+    }
+  }
+  if (body.vinculado_a !== undefined) update.vinculado_a = body.vinculado_a;
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: "nada que actualizar" }, { status: 400 });
+  }
+
   const { error } = await sbAdmin()
     .from("transactions")
-    .update({ category: body.category })
+    .update(update)
     .eq("id", body.id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
